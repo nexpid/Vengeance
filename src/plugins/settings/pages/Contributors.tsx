@@ -23,6 +23,7 @@ export default function ContributorsSettingsPage() {
             <PageWrapper>
                 <ContributorsSection title="Team" data={Contributors.team} />
                 <ContributorsSection title="Contributors" data={Contributors.contributors} />
+                <ContributorsSection title="Vengeance" data={Contributors.vengeance} />
             </PageWrapper>
         </ScrollView>
     )

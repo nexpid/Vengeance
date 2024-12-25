@@ -45,7 +45,7 @@ export function serve() {
         ),
     )
 
-    console.info(chalk.bold.redBright('\nServing REVENGE bundle, available on:\n'))
+    console.info(chalk.bold.greenBright('\nServing VENGEANCE bundle, available on:\n'))
 
     const netInterfaces = os.networkInterfaces()
     for (const netinterfaces of Object.values(netInterfaces)) {

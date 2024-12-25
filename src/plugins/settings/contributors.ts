@@ -38,4 +38,15 @@ export default {
             roles: ['Early Android Tester'],
         },
     ],
-} as Record<'team' | 'contributors', Array<{ name: string; icon?: string; url?: string; roles: string[] }>>
+    vengeance: [
+        {
+            name: 'Nexpid',
+            icon: 'https://github.com/nexpid.png',
+            url: 'https://github.com/nexpid',
+            roles: ['Vengeance Lead Developer'],
+        },
+    ],
+} as Record<
+    'team' | 'contributors' | 'vengeance',
+    Array<{ name: string; icon?: string; url?: string; roles: string[] }>
+>

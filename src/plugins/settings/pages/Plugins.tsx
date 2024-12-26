@@ -224,16 +224,16 @@ export default function PluginsSettingsPage() {
                               ]),
                         [
                             {
-                                label: 'Show core plugins',
-                                IconComponent: showCorePlugins ? CheckmarkLargeIcon : undefined,
-                                variant: 'destructive',
-                                action: () => (storage.plugins.showCorePlugins = !showCorePlugins),
-                            },
-                            {
                                 label: 'Show Vengeance plugins',
                                 IconComponent: showVengeancePlugins ? CheckmarkLargeIcon : undefined,
                                 variant: 'destructive',
                                 action: () => (storage.plugins.showVengeancePlugins = !showVengeancePlugins),
+                            },
+                            {
+                                label: 'Show core plugins',
+                                IconComponent: showCorePlugins ? CheckmarkLargeIcon : undefined,
+                                variant: 'destructive',
+                                action: () => (storage.plugins.showCorePlugins = !showCorePlugins),
                             },
                         ],
                     ]}

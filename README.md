@@ -6,7 +6,21 @@
 
 ## ❔ How do I use Vengeance?
 
-You got here early! There's currently no way to use Vengeance without building it yourself :P
+You must first use [Revenge Rewrite](https://github.com/revenge-mod/revenge-rewrite). Go to Revenge's Developer settings, press the "Evaluate JavaScript" button and paste in this code:
+
+```js
+revenge.modules.native.FileModule.writeFile(
+  "documents",
+  "/pyoncord/loader.json",
+  '{"customLoadUrl":{"enabled":true,"url":"https://github.com/nexpid/Vengeance/releases/download/bundle/revenge.min.js"}}',
+  "utf8"
+)
+  .then(() => "Vengeance loaded! Reload to apply.")
+  .catch(() => "Something went wrong!");
+```
+
+> [!WARNING]
+> Do not run random pieces of code unless you know what they're doing. This code edits the `pyoncord/loader.json` file in the app's `documents` to load Vengeance's bundle instead of Revenge's.
 
 ## ❓ I encountered an issue! How do I report it?
 

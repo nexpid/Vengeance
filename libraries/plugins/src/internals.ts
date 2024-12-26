@@ -25,6 +25,7 @@ import type {
     PluginStopConfig,
     PluginStorage,
 } from '.'
+import { createElement } from 'react'
 
 export const appRenderedCallbacks = new Set<() => Promise<unknown>>()
 export const corePluginIds = new Set<string>()
@@ -49,6 +50,7 @@ export function registerPlugin<Storage = PluginStorage, AppLaunchedReturn = void
     core = false,
     manageable = !core,
     predicate?: () => boolean,
+    enabledByDefault?: boolean,
 ) {
     const cleanups = new Set<() => unknown>()
 
@@ -72,10 +74,10 @@ export function registerPlugin<Storage = PluginStorage, AppLaunchedReturn = void
         state: lazyValue(
             () =>
                 // Manageable?
-                // - Yes: Check preferences, default to false if it doesn't exist
+                // - Yes: Check preferences, default to enabledByDefault or false if it doesn't exist
                 // - No: Check predicate, default to if core
                 (pluginsStates[definition.id] ??= {
-                    enabled: manageable ? false : (predicate?.() ?? core),
+                    enabled: manageable ? enabledByDefault || false : (predicate?.() ?? core),
                     errors: [],
                 }),
         ),
@@ -99,7 +101,9 @@ export function registerPlugin<Storage = PluginStorage, AppLaunchedReturn = void
             status = val
             if (val === startedStatus) this.state.errors = []
         },
-        SettingsComponent: definition.settings,
+        SettingsComponent: definition.SettingsComponent
+            ? () => createElement(definition.SettingsComponent!, instance)
+            : undefined,
         errors: [],
         disable() {
             if (!this.manageable) throw new Error(`Cannot disable unmanageable plugin: ${this.id}`)

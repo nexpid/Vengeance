@@ -12,6 +12,7 @@ export const WhitelistedPluginObjectKeys = [
     'stop',
     'author',
     'errors',
+    'SettingsComponent',
     // biome-ignore lint/suspicious/noExplicitAny: get out
 ] as const satisfies ReadonlyArray<keyof InternalPluginDefinition<any, any, any>>
 

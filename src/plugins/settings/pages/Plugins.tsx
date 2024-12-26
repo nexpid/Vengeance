@@ -1,6 +1,6 @@
 import { getAssetIndexByName } from '@revenge-mod/assets'
 
-import { createStyles, openAlert } from '@revenge-mod/modules/common'
+import { createStyles, NavigationNative, openAlert } from '@revenge-mod/modules/common'
 import {
     AlertActionButton,
     AlertModal,
@@ -105,9 +105,12 @@ function PluginCard({
     author,
     description,
     horizontalGaps,
+    SettingsComponent,
 }: PluginCardProps) {
     const cardStyles = usePluginCardStyles()
     const [enabled, setEnabled] = useState(_enabled)
+
+    const navigation = NavigationNative.useNavigation()
 
     return (
         <Card style={[cardStyles.card, horizontalGaps && cardStyles.withGap]}>
@@ -116,6 +119,19 @@ function PluginCard({
                     <Image source={getAssetIndexByName(icon ?? 'Revenge.PluginIcon')!} style={cardStyles.icon} />
                     <Text variant="heading-lg/semibold">{name}</Text>
                 </Stack>
+                {SettingsComponent && enabled && (
+                    <IconButton
+                        variant="secondary"
+                        size="sm"
+                        icon={getAssetIndexByName('SettingsIcon')}
+                        onPress={() =>
+                            navigation.push('RevengeCustomPage', {
+                                render: SettingsComponent,
+                                title: name,
+                            })
+                        }
+                    />
+                )}
                 <FormSwitch
                     value={enabled}
                     disabled={!manageable}
@@ -158,6 +174,8 @@ interface PluginCardProps {
     manageable: boolean
     core: boolean
     horizontalGaps: boolean
+    // biome-ignore lint/suspicious/noExplicitAny: Yawn
+    SettingsComponent?: FC<any>
 }
 
 type PluginSettingsPageContextValue = Storage['plugins'] & {

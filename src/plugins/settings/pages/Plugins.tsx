@@ -119,7 +119,7 @@ function PluginCard({
                     <Image source={getAssetIndexByName(icon ?? 'Revenge.PluginIcon')!} style={cardStyles.icon} />
                     <Text variant="heading-lg/semibold">{name}</Text>
                 </Stack>
-                {SettingsComponent && enabled && (
+                {SettingsComponent && (
                     <IconButton
                         variant="secondary"
                         size="sm"
@@ -130,6 +130,7 @@ function PluginCard({
                                 title: name,
                             })
                         }
+                        disabled={!enabled}
                     />
                 )}
                 <FormSwitch

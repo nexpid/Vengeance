@@ -24,5 +24,7 @@ jobs:
       
       - name: Upload Release Bundle
         if: ${{ github.repository == 'nexpid/Vengeance' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload bundle --clobber dist/*

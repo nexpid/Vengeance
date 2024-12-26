@@ -35,6 +35,8 @@ const plugin = registerPlugin<{
             // biome-ignore lint/suspicious/noExplicitAny: globalThis can be anything
             const win = globalThis as any
 
+            const doCleanup = new Set<() => void>()
+
             cleanup(
                 sui.addRowsToSection('Revenge', {
                     Debugger: {
@@ -52,10 +54,35 @@ const plugin = registerPlugin<{
                 (() => {
                     win.vengeance = {
                         reload: () => BundleUpdaterManager.reload(),
+                        patcher: {
+                            // biome-ignore lint/suspicious/noExplicitAny: These arguments can be anything lol
+                            snipe: (object: any, key: any, callback?: (args: unknown) => void) => {
+                                doCleanup.add(
+                                    patcher.after(
+                                        object,
+                                        key,
+                                        callback ?? ((args, ret) => console.log('[SNIPER]', args, ret)),
+                                        'vengeance.object.snipe',
+                                    ),
+                                )
+                            },
+                            // biome-ignore lint/suspicious/noExplicitAny: These arguments can be anything lol 2
+                            noop: (object: any, key: any) => {
+                                doCleanup.add(patcher.instead(object, key, () => void 0, 'vengeance.object.noop'))
+                            },
+                            wipe: () => {
+                                for (const c of doCleanup) c()
+                                doCleanup.clear()
+                            },
+                        },
                     }
 
                     return () => (win.vengeance = undefined)
                 })(),
+
+                () => {
+                    for (const c of doCleanup) c()
+                },
 
                 patcher.before(
                     win,

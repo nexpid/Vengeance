@@ -4,7 +4,7 @@
 
 **Vengeance**[^1] is a **proof-of-concept in-beta fork** of [Revenge Rewrite](https://github.com/revenge-mod/revenge-rewrite), inspired by [Vencord](https://github.com/Vendicated/Vencord)
 
-## ❓ How do I use Vengeance?
+## ❔ How do I use Vengeance?
 
 You got here early! There's currently no way to use Vengeance without building it yourself :P
 

@@ -5,7 +5,8 @@
   "license": "BSD-3-Clause",
   "scripts": {
     "serve": "bun run ./scripts/serve.mjs",
-    "build": "bun run ./scripts/build.mjs"
+    "build": "bun run ./scripts/build.mjs",
+    "debugger": "node ./scripts/debugger.mjs"
   },
   "dependencies": {
     "@revenge-mod/app": "workspace:*",
@@ -30,6 +31,7 @@
     "esbuild-plugin-globals": "^0.2.0",
     "react-native": "^0.76.3",
     "typescript": "^5.7.2",
+    "ws": "^8.18.0",
     "yargs-parser": "^21.1.1"
   },
   "workspaces": ["libraries/*"],

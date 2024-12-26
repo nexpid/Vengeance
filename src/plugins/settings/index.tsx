@@ -26,6 +26,7 @@ export type Storage = {
     plugins: {
         sortMode: 'asc' | 'dsc'
         showCorePlugins: boolean
+        showVengeancePlugins: boolean
     }
 }
 

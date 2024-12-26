@@ -174,7 +174,7 @@ export default function PluginsSettingsPage() {
     useObservable([pluginsStates, storage])
 
     const [query, setQuery] = useState('')
-    const { showCorePlugins, sortMode } = storage.plugins
+    const { showVengeancePlugins, showCorePlugins, sortMode } = storage.plugins
 
     const allPlugins = useMemo(
         () =>
@@ -191,7 +191,14 @@ export default function PluginsSettingsPage() {
     )
 
     const externalPluginsData = useMemo(() => allPlugins.filter(plugin => !plugin.core), [allPlugins])
-    const corePluginsData = useMemo(() => allPlugins.filter(plugin => plugin.core), [allPlugins])
+    const corePluginsData = useMemo(
+        () => allPlugins.filter(plugin => plugin.core && !plugin.id.startsWith('vengeance.')),
+        [allPlugins],
+    )
+    const vengeancePluginsData = useMemo(
+        () => allPlugins.filter(plugin => plugin.core && plugin.id.startsWith('vengeance.')),
+        [allPlugins],
+    )
 
     const MemoizedContextMenu = memo(
         ({ children }: Pick<ComponentProps<DiscordModules.Components.ContextMenu>, 'children'>) => {
@@ -222,6 +229,12 @@ export default function PluginsSettingsPage() {
                                 variant: 'destructive',
                                 action: () => (storage.plugins.showCorePlugins = !showCorePlugins),
                             },
+                            {
+                                label: 'Show Vengeance plugins',
+                                IconComponent: showVengeancePlugins ? CheckmarkLargeIcon : undefined,
+                                variant: 'destructive',
+                                action: () => (storage.plugins.showVengeancePlugins = !showVengeancePlugins),
+                            },
                         ],
                     ]}
                 >
@@ -231,9 +244,11 @@ export default function PluginsSettingsPage() {
         },
     )
 
-    const pluginListEmpty = !(showCorePlugins
-        ? corePluginsData.length + externalPluginsData.length
-        : externalPluginsData.length)
+    const pluginListEmpty = ![
+        showCorePlugins && corePluginsData.length,
+        showVengeancePlugins && vengeancePluginsData.length,
+        externalPluginsData.length,
+    ].reduce<number>((a, b) => a + (b || 0), 0)
 
     // TODO: Maybe create 2 separate data lists for non-filtered and filtered plugins
     const pluginListNoResults = pluginListEmpty && query
@@ -241,7 +256,13 @@ export default function PluginsSettingsPage() {
     return (
         <PageWrapper withTopControls>
             <PluginSettingsPageContext.Provider
-                value={{ setQuery, showCorePlugins, sortMode, ContextMenuComponent: MemoizedContextMenu }}
+                value={{
+                    setQuery,
+                    showCorePlugins,
+                    showVengeancePlugins,
+                    sortMode,
+                    ContextMenuComponent: MemoizedContextMenu,
+                }}
             >
                 {pluginListEmpty && !pluginListNoResults ? (
                     <PluginsSettingsPageEmptyView />
@@ -257,7 +278,17 @@ export default function PluginsSettingsPage() {
                                 style={styles.resizable}
                             >
                                 <PluginsSettingsPageMasonaryFlashList data={externalPluginsData} />
-                                {showCorePluginsInformationAlert && (
+                                {showVengeancePlugins && (
+                                    <PluginsSettingsPageMasonaryFlashList
+                                        header={
+                                            <View style={styles.headerContainer}>
+                                                <TableRowGroupTitle title="Vengeance Plugins" />
+                                            </View>
+                                        }
+                                        data={vengeancePluginsData}
+                                    />
+                                )}
+                                {showCorePlugins && (
                                     <PluginsSettingsPageMasonaryFlashList
                                         header={
                                             <View style={styles.headerContainer}>

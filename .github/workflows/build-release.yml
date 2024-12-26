@@ -1,0 +1,28 @@
+name: Build & Release Dist
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Build Revenge
+        run: bun run build -- --minify
+      
+      - name: Upload Release Bundle
+        if: ${{ github.repository == 'nexpid/Vengeance' }}
+        run: |
+          gh release upload bundle --clobber dist/*

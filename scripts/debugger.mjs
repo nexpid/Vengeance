@@ -3,6 +3,11 @@ import * as repl from 'node:repl'
 import { WebSocketServer } from 'ws'
 import chalk from 'chalk'
 
+if ('Bun' in globalThis)
+    throw new Error(
+        `Bun is unsupported due to it lacking compatibility with node:repl. Please run "node ./scripts/debugger.mjs" or "bun debugger"`,
+    )
+
 let isPrompting = false
 const logAsDebugger = (...messages) =>
     console.info((isPrompting ? '\n' : '') + chalk.bold.blue('[Debugger]'), ...messages)

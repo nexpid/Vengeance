@@ -164,6 +164,7 @@ const plugin = registerPlugin<Storage>(
             plugins: {
                 sortMode: 'asc',
                 showCorePlugins: true,
+                showVengeancePlugins: true,
             },
         }),
     },

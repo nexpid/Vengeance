@@ -2,6 +2,12 @@
 import * as repl from 'node:repl'
 import { WebSocketServer } from 'ws'
 import chalk from 'chalk'
+import clipboardy from 'clipboardy'
+import { join, resolve } from 'node:path'
+import { existsSync } from 'node:fs'
+import { mkdir, writeFile } from 'node:fs/promises'
+
+const debuggerHistoryPath = resolve(join('node_modules', 'debugger'))
 
 if ('Bun' in globalThis)
     throw new Error(
@@ -9,8 +15,8 @@ if ('Bun' in globalThis)
     )
 
 let isPrompting = false
-const logAsDebugger = (...messages) =>
-    console.info((isPrompting ? '\n' : '') + chalk.bold.blue('[Debugger]'), ...messages)
+
+const debuggerColorify = message => (isPrompting ? '\n' : '') + chalk.bold.blue('[Debugger] ') + message
 
 const clientColorify = (style, message) =>
     (isPrompting ? '\n' : '') +
@@ -20,9 +26,14 @@ const clientColorify = (style, message) =>
           ? chalk.bold.yellow('[Vengeance] ') + chalk.yellow(message)
           : chalk.bold.green('[Vengeance] ') + message)
 
+const logAsDebugger = message => console.info(debuggerColorify(message))
+
 const logAsClient = message => console.info(clientColorify(null, message))
 const logAsClientWarn = message => console.warn(clientColorify('warn', message))
 const logAsClientError = message => console.error(clientColorify('error', message))
+
+const copyPrompt = ' --copy'
+const clearHistoryPrompt = '--ch'
 
 export function serve() {
     let websocketOpen = false
@@ -43,12 +54,16 @@ export function serve() {
                 const json = JSON.parse(data.toString())
 
                 if (awaitingReply?.cb && awaitingReply?.nonce && awaitingReply.nonce === json.nonce) {
-                    awaitingReply.cb(
-                        null,
-                        json.level === 'error'
-                            ? clientColorify('error', json.message)
-                            : clientColorify(null, json.message),
-                    )
+                    if (json.level === 'info' && awaitingReply.toCopy) {
+                        clipboardy.write(json.message)
+                        awaitingReply.cb(null, debuggerColorify('Copied result to clipboard'))
+                    } else
+                        awaitingReply.cb(
+                            null,
+                            json.level === 'error'
+                                ? clientColorify('error', json.message)
+                                : clientColorify(null, json.message),
+                        )
                     awaitingReply = null
                     isPrompting = true
                 } else {
@@ -69,13 +84,22 @@ export function serve() {
 
                 try {
                     isPrompting = false
+
+                    const code = input.trim()
+                    if (code === clearHistoryPrompt) {
+                        writeFile(join(debuggerHistoryPath, 'history.txt'), '')
+                        logAsDebugger('Cleared repl history')
+                        return cb()
+                    }
+
                     awaitingReply = {
                         nonce: crypto.randomUUID(),
                         cb,
+                        toCopy: code.endsWith(copyPrompt),
                     }
                     ws.send(
                         JSON.stringify({
-                            code: input.trim(),
+                            code: code.endsWith(copyPrompt) ? code.slice(0, -copyPrompt.length) : code,
                             nonce: awaitingReply.nonce,
                         }),
                     )
@@ -87,6 +111,7 @@ export function serve() {
                 return msg
             },
         })
+        rl.setupHistory(join(debuggerHistoryPath, 'history.txt'), () => void 0)
 
         rl.on('close', () => {
             isPrompting = false
@@ -102,8 +127,12 @@ export function serve() {
     })
 
     logAsDebugger('Debugger ready at :9090')
+    logAsDebugger(`Add${chalk.bold(copyPrompt)} to your prompt to copy the result to clipboard`)
+    logAsDebugger(`Type ${chalk.bold(clearHistoryPrompt)} to clear your repl history `)
 
     return wss
 }
+
+if (!existsSync(debuggerHistoryPath)) await mkdir(debuggerHistoryPath, { recursive: true })
 
 serve()

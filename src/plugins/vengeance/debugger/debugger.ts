@@ -96,7 +96,7 @@ export function connectToDebugger(addr: string, context: DebuggerContextType) {
                         ws.send(
                             JSON.stringify({
                                 level: 'info',
-                                message: inspect(res, { depth: 5 }),
+                                message: inspect(res, { showHidden: true }),
                                 nonce: json.nonce,
                             }),
                         )
@@ -105,7 +105,7 @@ export function connectToDebugger(addr: string, context: DebuggerContextType) {
                     ws.send(
                         JSON.stringify({
                             level: 'error',
-                            message: `VengeanceInternalError: ${String(e)}`,
+                            message: `DebuggerInternalError: ${String(e)}`,
                             nonce: json.nonce,
                         }),
                     )

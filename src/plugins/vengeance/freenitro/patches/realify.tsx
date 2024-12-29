@@ -37,7 +37,14 @@ type ContentSkeleton =
           animated?: boolean
       }
     | {
+          type: 'text'
+          content: string
+      }
+    | {
           content: ContentSkeleton[]
+      }
+    | {
+          items: ContentSkeleton[][]
       }
     | null
 
@@ -224,58 +231,63 @@ export function patchRealify({ revenge: { modules }, cleanup, storage, patcher }
                     // nay!
                     else {
                         let isJumboable = true
-                        function recursiveCheck(contents: ContentSkeleton[], removeIs: Set<number>) {
-                            if (shouldDebug) console.log('Rec check ', contents)
-
+                        function recursiveCheck(contents: ContentSkeleton[] | ContentSkeleton[][]) {
                             for (const i in contents) {
                                 const cnt = contents[i]
                                 if (!cnt) continue
 
-                                if ('type' in cnt && cnt.type === 'link') {
-                                    if (typeof cnt.target === 'string') {
-                                        const e = findFakeEmoji(cnt.target, id => emojis.get(id))
-                                        if (e) {
-                                            emojis.set(e.id, e)
+                                if (Array.isArray(cnt)) recursiveCheck(cnt)
+                                else {
+                                    if ('type' in cnt && cnt.type === 'link') {
+                                        if (typeof cnt.target === 'string') {
+                                            const e = findFakeEmoji(cnt.target, id => emojis.get(id))
+                                            if (e) {
+                                                emojis.set(e.id, e)
 
-                                            contents[i] = {
-                                                type: 'customEmoji',
-                                                id: e.id,
-                                                alt: e.name + isFakerAlt,
-                                                src: e.src,
-                                                frozenSrc: e.src.replace('.gif', '.webp'),
-                                                get jumboable() {
-                                                    return isJumboable
-                                                },
-                                                animated: e.animated,
-                                            }
-                                        } else {
-                                            const s = findFakeSticker(cnt.target, id => stickers.get(id))
-                                            if (s) {
-                                                stickers.set(s.id, s)
-
-                                                removeIs.add(Number(i))
+                                                contents[i] = {
+                                                    type: 'customEmoji',
+                                                    id: e.id,
+                                                    alt: e.name + isFakerAlt,
+                                                    src: e.src,
+                                                    frozenSrc: e.src.replace('.gif', '.webp'),
+                                                    get jumboable() {
+                                                        return isJumboable
+                                                    },
+                                                    animated: e.animated,
+                                                }
+                                            } else {
+                                                const s = findFakeSticker(cnt.target, id => stickers.get(id))
+                                                if (s) {
+                                                    stickers.set(s.id, s)
+                                                    contents[i] = {
+                                                        type: 'text',
+                                                        content: '',
+                                                    }
+                                                }
                                             }
                                         }
-                                    }
-                                } else if ('content' in cnt && Array.isArray(cnt.content)) {
-                                    const removeIs = new Set<number>()
-                                    recursiveCheck(cnt.content, removeIs)
-                                    cnt.content = cnt.content.filter((_, i) => !removeIs.has(i))
+                                    } else if ('content' in cnt && Array.isArray(cnt.content))
+                                        recursiveCheck(cnt.content)
+                                    else if ('items' in cnt && Array.isArray(cnt.items)) recursiveCheck(cnt.items)
                                 }
                             }
 
+                            if (shouldDebug) console.log('Rec check ', contents)
+
                             if (
-                                contents.find(x => x && (!('type' in x) || x.type !== 'customEmoji')) ||
+                                contents.find(
+                                    x =>
+                                        x &&
+                                        (!('type' in x) ||
+                                            (x.type === 'text' && x.content.length > 0) ||
+                                            x.type !== 'customEmoji'),
+                                ) ||
                                 contents.filter(x => x && 'type' in x && x.type === 'customEmoji').length > 30
                             )
                                 isJumboable = false
                         }
 
-                        if (shouldDebug ? DebuggerContext.connected : true) {
-                            const removeIs = new Set<number>()
-                            recursiveCheck(message.content, removeIs)
-                            message.content = message.content.filter((_, i) => !removeIs.has(i))
-                        }
+                        if (shouldDebug ? DebuggerContext.connected : true) recursiveCheck(message.content)
                     }
 
                     // check attachments for stickers

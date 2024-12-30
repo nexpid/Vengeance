@@ -6,7 +6,9 @@
 
 ## ❔ How do I use Vengeance?
 
-You must first use [Revenge Rewrite](https://github.com/revenge-mod/revenge-rewrite). Go to Revenge's Developer settings, press the "Evaluate JavaScript" button and paste in this code:
+### If using Revenge Rewrite
+
+Enable Developer settings in Plugins > Developer settings. Then, open Developer settings and tap the "Evaluate JavaScript" button and paste in this code:
 
 ```js
 revenge.modules.native.FileModule.writeFile(
@@ -18,6 +20,12 @@ revenge.modules.native.FileModule.writeFile(
   .then(() => "Vengeance loaded! Reload to apply.")
   .catch(() => "Something went wrong!");
 ```
+
+### If using Revenge stable
+
+Enable Developer settings in Revenge > Developer settings. Then, open Developer settings > Load from custom URL > and paste in:
+
+`https://github.com/nexpid/Vengeance/releases/download/bundle/revenge.min.js`
 
 > [!WARNING]
 > Do not run random pieces of code unless you know what they're doing. This code edits the `pyoncord/loader.json` file in the app's `documents` to load Vengeance's bundle instead of Revenge's.

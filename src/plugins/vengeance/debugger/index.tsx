@@ -1,7 +1,7 @@
 import { getAssetIndexByName } from '@revenge-mod/assets'
 import type { PluginContextFor } from '@revenge-mod/plugins'
 import { sleep } from '@revenge-mod/utils/functions'
-import { registerPlugin } from 'libraries/plugins/src/internals'
+import { registerPlugin } from '@revenge-mod/plugins/internals'
 import DebuggerSettingsPage from './pages/Debugger'
 import { connectToDebugger, DebuggerContext } from './debugger'
 import { BundleUpdaterManager } from '@revenge-mod/modules/native'

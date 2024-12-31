@@ -273,7 +273,7 @@ export function patchRealify({ revenge: { modules }, cleanup, storage, patcher }
                                 x =>
                                     x &&
                                     (!('type' in x) ||
-                                        (x.type === 'text' && x.content.length > 0) ||
+                                        (x.type === 'text' && x.content?.length > 0) ||
                                         x.type !== 'customEmoji'),
                             ) ||
                             contents.filter(x => x && 'type' in x && x.type === 'customEmoji').length > 30

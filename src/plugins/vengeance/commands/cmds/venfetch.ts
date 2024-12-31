@@ -18,28 +18,33 @@ const getCurrentUser = lazyValue(() => findProp('getCurrentUser'))! as () => {
 } | null
 
 const message = ({
-    clr,
+    baseClr,
+    keyClr,
+    titleClr,
     username,
     title,
     discord,
     os,
     device,
     plugins,
-}: Record<'clr' | 'username' | 'title' | 'discord' | 'os' | 'device' | 'plugins', string>) => `
+}: Record<
+    'baseClr' | 'keyClr' | 'titleClr' | 'username' | 'title' | 'discord' | 'os' | 'device' | 'plugins',
+    string | number
+>) => `
 \`\`\`ansi
-[0;3${clr}m ▄▀▀▀▀▀▄▄▄▄▄▄▀▀▀▀▀▄     [1;4;3${clr}mVengeance@${username}[0;30m ${title}
-[0;3${clr}m█                  █    [0;1mDiscord[0m  ${discord}
-[0;3${clr}m█   ▄▄▄▄     ▄▄▄▄   █   [0;1mOS[0m  ${os}
-[0;3${clr}m█   ▀███▀   ▀███▀   █   [0;1mDevice[0m  ${device}
-[0;3${clr}m █                  █   [0;1mPlugins[0m  ${plugins}
-[0;3${clr}m ▀▄▄▄▄▄▄▄▄▄        █    [0m
-[0;3${clr}m         █      ▄▄▀     [0m[0;40;30m█▓▒▒░ [0m   [0;41;31m█▓▒▒░ [0m   [0;44;32m█▓▒▒░ [0m   [0;44;33m█▓▒▒░ [0m
-[0;3${clr}m          ▀▀▀▀▀▀▀       [0m[0;43;34m█▓▒▒░ [0m   [0;41;35m█▓▒▒░ [0m   [0;44;36m█▓▒▒░ [0m   [0;42;37m█▓▒▒░ [0m
+[0;3${baseClr}m ▄▀▀▀▀▀▄▄▄▄▄▄▀▀▀▀▀▄     [1;4;3${baseClr}mVengeance@${username}[0;3${titleClr}m ${title}
+[0;3${baseClr}m█                  █    [1;3${keyClr}mDiscord[0m ${discord}
+[0;3${baseClr}m█   ▄▄▄▄     ▄▄▄▄   █   [1;3${keyClr}mOS[0m ${os}
+[0;3${baseClr}m█   ▀███▀   ▀███▀   █   [1;3${keyClr}mDevice[0m ${device}
+[0;3${baseClr}m █                  █   [1;3${keyClr}mPlugins[0m ${plugins}
+[0;3${baseClr}m ▀▄▄▄▄▄▄▄▄▄        █    [0m
+[0;3${baseClr}m         █      ▄▄▀     [0m[0;40;30m█▓▒▒░ [0m   [0;41;31m█▓▒▒░ [0m   [0;44;32m█▓▒▒░ [0m   [0;44;33m█▓▒▒░ [0m
+[0;3${baseClr}m          ▀▀▀▀▀▀▀       [0m[0;43;34m█▓▒▒░ [0m   [0;41;35m█▓▒▒░ [0m   [0;44;36m█▓▒▒░ [0m   [0;42;37m█▓▒▒░ [0m
 \`\`\`
 `
 
-const prime = 998244353
-const colorRange = 7
+const prime = 2147483647
+const colorRange = 8
 
 export default (<SimpleCommand>{
     inputType: ApplicationCommandInputType.BuiltIn,
@@ -74,21 +79,29 @@ export default (<SimpleCommand>{
         const corePlugins = allPlugins.filter(
             plugin => plugin.core && !plugin.id.startsWith('vengeance.') && plugin.manageable && plugin.enabled,
         )
+        const username = getCurrentUser()?.username ?? 'johndoe'
 
-        const { username } = getCurrentUser() ?? { username: 'johndoe' }
-        const clr = String(
-            color?.value && Number.isFinite(Number(color.value))
+        const clrMap = [
+            [0, 7],
+            [1, 5],
+            [2, 3],
+            [4, 6],
+        ]
+
+        const baseClr =
+            color && Number.isFinite(Number(color.value))
                 ? Math.abs(Number(color.value) % colorRange)
-                : (username
+                : username
                       .split('')
                       .map(x => x.charCodeAt(0))
-                      .reduce((curr, a) => (curr * 31 + a) % prime, 0) %
-                      colorRange) +
-                      1,
-        )
+                      .reduce((curr, a) => (curr * 31 + a) % prime, 0) % colorRange
+
+        const keyClr = clrMap.find(([a, b]) => a === baseClr || b === baseClr)?.find(x => x !== baseClr) ?? 0
 
         const content = message({
-            clr,
+            baseClr,
+            keyClr,
+            titleClr: baseClr === 0 ? 7 : 0,
             username,
             title: `${__REVENGE_HASH__}${__REVENGE_HASH_DIRTY__ ? '-dirty' : ''} (${__PYON_LOADER__.loaderName} v${__PYON_LOADER__.loaderVersion})`,
             discord: `${ClientInfoModule.Version} (${ClientInfoModule.Build}) ${isOutdated ? '⚰' : ''}${ClientInfoModule.ReleaseChannel.includes('canary') ? '🌩' : ''}`,

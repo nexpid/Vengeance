@@ -14,6 +14,7 @@ const { getDeviceInfo, getDeviceManufacturer } = lazyValue(() => findByProps('ge
     () => string
 >
 const getCurrentUser = lazyValue(() => findProp('getCurrentUser'))! as () => {
+    id: string
     username: string
 } | null
 
@@ -43,7 +44,7 @@ const message = ({
 \`\`\`
 `
 
-const prime = 2147483647
+const prime = 524287
 const colorRange = 8
 
 export default (<SimpleCommand>{
@@ -79,7 +80,7 @@ export default (<SimpleCommand>{
         const corePlugins = allPlugins.filter(
             plugin => plugin.core && !plugin.id.startsWith('vengeance.') && plugin.manageable && plugin.enabled,
         )
-        const username = getCurrentUser()?.username ?? 'johndoe'
+        const { username, id } = getCurrentUser() ?? { username: 'johndoe', id: prime.toString() }
 
         const clrMap = [
             [0, 7],
@@ -91,10 +92,7 @@ export default (<SimpleCommand>{
         const baseClr =
             color && Number.isFinite(Number(color.value))
                 ? Math.abs(Number(color.value) % colorRange)
-                : username
-                      .split('')
-                      .map(x => x.charCodeAt(0))
-                      .reduce((curr, a) => (curr * 31 + a) % prime, 0) % colorRange
+                : Number((BigInt(id) / BigInt(prime)) % BigInt(8))
 
         const keyClr = clrMap.find(([a, b]) => a === baseClr || b === baseClr)?.find(x => x !== baseClr) ?? 0
 

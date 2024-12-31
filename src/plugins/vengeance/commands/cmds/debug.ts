@@ -32,15 +32,15 @@ export default (<SimpleCommand>{
 
         const content = [
             '**Vengeance Debug**',
-            `> **Vengeance**: ${__REVENGE_RELEASE__} (${__REVENGE_HASH__}${__REVENGE_HASH_DIRTY__ ? '-dirty' : ''}) (${__PYON_LOADER__.loaderName} ${__PYON_LOADER__.loaderVersion})`,
-            `> **Discord**: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`,
-            isOutdated && '> :warning: Is using an unsupported version',
-            ClientInfoModule.ReleaseChannel.includes('alpha') &&
-                `> :warning: Is using **${ClientInfoModule.ReleaseChannel}**`,
-            `> **React**: ${React.version} (**RN** ${runtimeProps['OSS Release Version']?.slice(7)})`,
-            `> **Hermes**: ${runtimeProps['OSS Release Version']} (**bytecode** ${runtimeProps['Bytecode Version']})`,
-            `> **System**: ${PlatformConstants.systemName ?? 'Android'} ${PlatformConstants.Release ?? PlatformConstants.osVersion} ${PlatformConstants.Version ? ` (SDK ${PlatformConstants.Version})` : ''}`,
-            `> **Device**: ${getDeviceInfo()} (**by** ${getDeviceManufacturer()})`,
+            `> **Vengeance:** ${__REVENGE_HASH__}${__REVENGE_HASH_DIRTY__ ? '-dirty' : ''} (${__PYON_LOADER__.loaderName} v${__PYON_LOADER__.loaderVersion})`,
+            `> **Discord:** ${ClientInfoModule.Version} (${ClientInfoModule.Build})`,
+            `> **React:** ${React.version} (**RN** ${runtimeProps['OSS Release Version']?.slice(7)})`,
+            `> **Hermes:** ${runtimeProps['OSS Release Version']} (bytecode ${runtimeProps['Bytecode Version']})`,
+            `> **OS:** ${PlatformConstants.systemName ?? 'Android'} ${PlatformConstants.Release ?? PlatformConstants.osVersion}${PlatformConstants.Version ? ` (SDK ${PlatformConstants.Version})` : ''}`,
+            `> **Device:** ${getDeviceInfo()} (by ${getDeviceManufacturer()})`,
+            isOutdated && '> :warning: Using outdated and unsupported version',
+            ClientInfoModule.ReleaseChannel.includes('canary') &&
+                `> :warning: Using release **${ClientInfoModule.ReleaseChannel}**`,
         ]
             .filter(row => !!row)
             .join('\n')

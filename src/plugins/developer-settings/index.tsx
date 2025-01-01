@@ -144,7 +144,14 @@ function setupDebugger({ patcher, cleanup }: PluginContextFor<typeof plugin, 'Af
                     ),
                 ),
             noop: (object, key) =>
-                debuggerCleanups.add(patcher.instead(object, key, () => void 0, 'revenge.plugins.developer-settings.debugger.patcher.noop')),
+                debuggerCleanups.add(
+                    patcher.instead(
+                        object,
+                        key,
+                        () => void 0,
+                        'revenge.plugins.developer-settings.debugger.patcher.noop',
+                    ),
+                ),
             wipe: () => {
                 for (const c of debuggerCleanups) c()
                 debuggerCleanups.clear()

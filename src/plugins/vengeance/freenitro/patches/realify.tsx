@@ -1,5 +1,5 @@
+import { DebuggerContext } from 'src/plugins/developer-settings/debugger'
 import type { FreeNitroPluginContext } from '..'
-import { DebuggerContext } from '../../debugger/debugger'
 import type { Emoji, Sticker } from '../types'
 import { View } from 'react-native'
 

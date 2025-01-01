@@ -42,6 +42,8 @@ declare global {
           }
         | undefined
 
+    var globalEvalWithSourceUrl: (code: string, sourceURL: string) => any
+
     const ErrorUtils: RNErrorUtils
 
     var performance: {
@@ -62,7 +64,7 @@ declare global {
         /// AND: https://github.com/facebook/hermes/blob/main/lib/InternalBytecode/01-Promise.js
         _h: 0 | 1 | 2
     }
-    // biome-ignore lint/suspicious/noExplicitAny: explode
+
     type HermesPromiseRejectionHandler = (promise: Promise<any>, error: any) => void
 
     interface PromiseConstructor {
@@ -207,6 +209,24 @@ declare module '@revenge-mod/plugins' {
     const plugins: typeof import('./libraries/plugins')
     export * from './libraries/plugins'
     export default plugins
+}
+
+declare module '@revenge-mod/plugins/internals' {
+    const internals: typeof import('./libraries/plugins/src/internals')
+    export * from './libraries/plugins/src/internals'
+    export default internals
+}
+
+declare module '@revenge-mod/plugins/constants' {
+    const constants: typeof import('./libraries/plugins/src/constants')
+    export * from './libraries/plugins/src/constants'
+    export default constants
+}
+
+declare module '@revenge-mod/plugins/schemas' {
+    const schemas: typeof import('./libraries/plugins/src/schemas')
+    export * from './libraries/plugins/src/schemas'
+    export default schemas
 }
 
 declare module '@revenge-mod/storage' {

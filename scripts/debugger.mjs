@@ -1,12 +1,12 @@
 #!/usr/bin/env node
+import { existsSync } from 'fs'
 import * as repl from 'node:repl'
-import { WebSocketServer } from 'ws'
 import os from 'os'
+import { join, resolve } from 'path'
 import chalk from 'chalk'
 import clipboardy from 'clipboardy'
-import { join, resolve } from 'path'
-import { existsSync } from 'fs'
 import { mkdir, writeFile } from 'fs/promises'
+import { WebSocketServer } from 'ws'
 
 const debuggerHistoryPath = resolve(join('node_modules', 'debugger'))
 
@@ -22,7 +22,7 @@ const debuggerColorify = message => (isPrompting ? '\n' : '') + chalk.bold.blue(
 const clientColorify = (style, message) =>
     (isPrompting ? '\n' : '') +
     (style === 'error'
-        ? chalk.bold.red('[Vengeance] ERR! ') + chalk.red(message)
+        ? chalk.bold.red('[Vengeance] ') + chalk.red(message)
         : style === 'warn'
           ? chalk.bold.yellow('[Vengeance] ') + chalk.yellow(message)
           : chalk.bold.green('[Vengeance] ') + message)

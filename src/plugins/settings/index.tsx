@@ -15,6 +15,7 @@ import AboutSettingsPage from './pages/About'
 import ContributorsSettingsPage from './pages/Contributors'
 import CustomPageRenderer from './pages/CustomPageRenderer'
 import PluginsSettingsPage from './pages/Plugins'
+import PluginBrowserPage from './pages/Plugins/Browser'
 import RevengeSettingsPage from './pages/Revenge'
 
 import Contributors from './contributors'
@@ -38,6 +39,8 @@ const plugin = registerPlugin<Storage>(
         id: 'revenge.settings',
         version: '1.0.0',
         icon: 'SettingsIcon',
+    },
+    {
         async afterAppRender(context) {
             const {
                 patcher,
@@ -84,11 +87,20 @@ const plugin = registerPlugin<Storage>(
                 },
             })
 
+            sui.createRoute('RevengePluginBrowser', {
+                type: 'route',
+                label: 'Plugin Browser',
+                component: PluginBrowserPage,
+                icon: assets.getIndexByName('Revenge.PluginIcon'),
+                parent: 'RevengePlugins',
+            })
+
             sui.createRoute('RevengeAbout', {
                 type: 'route',
                 label: 'About',
                 component: AboutSettingsPage,
                 icon: assets.getIndexByName('CircleInformationIcon-primary'),
+                parent: 'Revenge',
             })
 
             sui.createRoute('RevengeContributors', {
@@ -96,6 +108,7 @@ const plugin = registerPlugin<Storage>(
                 label: 'Contributors',
                 component: ContributorsSettingsPage,
                 icon: assets.getIndexByName('FriendsIcon'),
+                parent: 'Revenge',
             })
 
             sui.createRoute('RevengeCustomPage', {
@@ -165,12 +178,12 @@ const plugin = registerPlugin<Storage>(
         initializeStorage: () => ({
             plugins: {
                 sortMode: 'asc',
-                showCorePlugins: true,
+                showCorePlugins: false,
                 showVengeancePlugins: true,
             },
         }),
     },
-    true,
+    { core: true, manageable: false },
 )
 
 export const PluginContext = createContext<PluginContextFor<typeof plugin, 'AfterAppRender'>>(null!)

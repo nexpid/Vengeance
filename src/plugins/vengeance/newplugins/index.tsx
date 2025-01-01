@@ -44,9 +44,9 @@ registerPlugin<{
 
 const useAlertStyles = createStyles({
     icon: {
-        tintColor: SemanticColor.INTERACTIVE_NORMAL,
-        width: 22,
-        height: 22,
+        tintColor: SemanticColor.TEXT_NORMAL,
+        width: 20,
+        height: 20,
         marginTop: 3,
     },
 })
@@ -67,11 +67,12 @@ function NewPluginsAlert({ plugins }: { plugins: (typeof _plugins)[string][] }) 
                             }
                             style={styles.icon}
                         />
-                        <Stack direction="vertical" spacing={2} style={{ flexShrink: 1 }}>
-                            <Text variant="text-lg/semibold">{pluh.name}</Text>
-                            <Text variant="text-md/medium" color="text-muted">
-                                {pluh.description}
+                        <Stack direction="vertical" spacing={0} style={{ flexShrink: 1 }}>
+                            <Text variant="heading-lg/semibold">{pluh.name}</Text>
+                            <Text variant="heading-md/medium" color="text-muted" style={{ marginBottom: 4 }}>
+                                by {pluh.author}
                             </Text>
+                            <Text variant="text-md/medium">{pluh.description}</Text>
                         </Stack>
                     </Stack>
                 </Card>

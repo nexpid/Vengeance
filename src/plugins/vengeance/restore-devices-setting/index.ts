@@ -8,6 +8,8 @@ registerPlugin(
         id: 'vengeance.palmdevs.restore-devices-setting',
         version: '1.0.0',
         icon: 'LaptopPhoneIcon',
+    },
+    {
         beforeAppRender({ patcher, revenge: { modules } }) {
             const DevicesSetting = modules.findByFilePath<{ usePredicate(): boolean }, true>(
                 'modules/main_tabs_v2/native/settings/definitions/DevicesSetting.tsx',
@@ -17,6 +19,5 @@ registerPlugin(
             patcher.instead(DevicesSetting!, 'usePredicate', () => true)
         },
     },
-    true,
-    true,
+    { core: true, manageable: true },
 )

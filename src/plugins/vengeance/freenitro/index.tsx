@@ -61,12 +61,13 @@ const plugin = registerPlugin<{
         id: 'vengeance.freenitro',
         version: '1.0.0',
         icon: 'GiftIcon',
+    },
+    {
         beforeAppRender(context) {
             const {
                 revenge: { modules },
                 storage,
                 patcher,
-                cleanup,
             } = context
 
             const emojiPickerOpen = { current: new Set<string>() }
@@ -99,12 +100,8 @@ const plugin = registerPlugin<{
                 },
             ] satisfies { key: string; predicate: () => boolean }[]
 
-            cleanup(
-                // @ts-expect-error "A spread argument must either have a tuple type or be passed to a rest parameter"
-                ...predicates.map(({ key, predicate }) =>
-                    patcher.instead(canUseObj, key, (args, original) => predicate() || original.apply(this, args)),
-                ),
-            )
+            for (const { key, predicate } of predicates)
+                patcher.instead(canUseObj, key, (args, original) => predicate() || original.apply(this, args))
 
             // Emoji & Stickers
             patchFakeify(context, emojiPickerOpen)
@@ -253,9 +250,7 @@ const plugin = registerPlugin<{
             )
         },
     },
-    true,
-    true,
-    undefined,
+    { core: true, manageable: true },
 )
 
 export type FreeNitroPluginContext = PluginContextFor<typeof plugin, 'BeforeAppRender'>

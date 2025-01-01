@@ -102,7 +102,9 @@ export function registerPlugin<Storage = PluginStorage, AppLaunchedReturn = void
         get stopped() {
             return this.status === PluginStatus.Stopped
         },
-        SettingsComponent: definition.settings ? () => createElement(definition.settings!, def) : undefined,
+        SettingsComponent: definition.SettingsComponent
+            ? () => createElement(definition.SettingsComponent!, ctx)
+            : undefined,
         disable() {
             if (!this.manageable) throw new Error(`Cannot disable unmanageable plugin: ${this.id}`)
 

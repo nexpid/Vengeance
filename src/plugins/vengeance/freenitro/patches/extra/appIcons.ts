@@ -18,6 +18,8 @@ export function patchAppIcons({ revenge: { modules }, storage, patcher, cleanup 
     }
 
     let patched = true
+    cleanup(() => (patched = false))
+
     const _Freemiums = iconsIds.FreemiumAppIconIds
     Object.defineProperty(iconsIds, 'FreemiumAppIconIds', {
         get() {
@@ -25,60 +27,51 @@ export function patchAppIcons({ revenge: { modules }, storage, patcher, cleanup 
         },
     })
 
-    cleanup(
-        patcher.after(
-            icons,
-            'getIcons',
-            (_, ret) =>
-                storage.extra.appIcons
-                    ? ret.map(x => ({
-                          ...x,
-                          isPremium: false,
-                      }))
-                    : ret,
-            'appicons.getIcons',
-        ),
-        patcher.after(
-            icons,
-            'getOfficialAlternateIcons',
-            (_, ret) =>
-                storage.extra.appIcons
-                    ? ret.map(x => ({
-                          ...x,
-                          isPremium: false,
-                      }))
-                    : ret,
-            'appicons.getOfficialAlternateIcons',
-        ),
-        patcher.after(
-            icons,
-            'getIconById',
-            (_, ret) =>
-                storage.extra.appIcons
-                    ? {
-                          ...ret,
-                          isPremium: false,
-                      }
-                    : ret,
-            'appicons.getIconById',
-        ),
+    patcher.after(
+        icons,
+        'getIcons',
+        (_, ret) =>
+            storage.extra.appIcons
+                ? ret.map(x => ({
+                      ...x,
+                      isPremium: false,
+                  }))
+                : ret,
+        'appicons.getIcons',
+    )
+    patcher.after(
+        icons,
+        'getOfficialAlternateIcons',
+        (_, ret) =>
+            storage.extra.appIcons
+                ? ret.map(x => ({
+                      ...x,
+                      isPremium: false,
+                  }))
+                : ret,
+        'appicons.getOfficialAlternateIcons',
+    )
+    patcher.after(
+        icons,
+        'getIconById',
+        (_, ret) =>
+            storage.extra.appIcons
+                ? {
+                      ...ret,
+                      isPremium: false,
+                  }
+                : ret,
+        'appicons.getIconById',
+    )
 
-        () => (patched = false),
-
-        // setting useIsPremiumAppIconUpsellEnabled to true will force Discord to use "PremiumAppIconFeatureUpsell" instead of "PremiumFeatureUpsellPill" (a component I can't find)
-        patcher.instead(
-            upsellObj,
-            'useIsPremiumAppIconUpsellEnabled',
-            () => storage.extra.appIcons,
-            'appicons.upsellObj',
-        ),
-        patcher.instead(
-            upsellComponent,
-            'default',
-            function (args, original) {
-                return storage.extra.appIcons ? null : original.apply(this, args)
-            },
-            'appicons.upsellComponent',
-        ),
+    // setting useIsPremiumAppIconUpsellEnabled to true will force Discord to use "PremiumAppIconFeatureUpsell" instead of "PremiumFeatureUpsellPill" (a component I can't find)
+    patcher.instead(upsellObj, 'useIsPremiumAppIconUpsellEnabled', () => storage.extra.appIcons, 'appicons.upsellObj')
+    patcher.instead(
+        upsellComponent,
+        'default',
+        function (args, original) {
+            return storage.extra.appIcons ? null : original.apply(this, args)
+        },
+        'appicons.upsellComponent',
     )
 }

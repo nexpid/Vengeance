@@ -1,7 +1,7 @@
 import type { Patcher } from '@revenge-mod/patcher'
 import type { RevengeLibrary } from '@revenge-mod/revenge'
 import type { ExtendedObservable } from '@revenge-mod/storage'
-import type React from 'react'
+import type { FC } from 'react'
 
 import type { Metro } from '@revenge-mod/modules'
 import type { WhitelistedPluginObjectKeys } from './constants'
@@ -42,7 +42,7 @@ export type PluginDefinition<Storage, AppLaunchedReturn, AppInitializedReturn> =
         unsubscribeAll: () => boolean,
     ) => void
 } & {
-    settings?: React.FC<PluginContext<'AfterAppRender', Storage, AppLaunchedReturn, AppInitializedReturn>>
+    SettingsComponent?: FC<PluginContext<'AfterAppRender', Storage, AppLaunchedReturn, AppInitializedReturn>>
     initializeStorage?: () => Storage
 }
 

@@ -55,7 +55,7 @@ const isFakerAlt = '\u200b [FreeNitro fake]'
 
 const shouldDebug = false
 
-export function patchRealify({ revenge: { modules }, cleanup, storage, patcher }: FreeNitroPluginContext) {
+export function patchRealify({ revenge: { modules }, storage, patcher }: FreeNitroPluginContext) {
     const StickerDetailActionSheet = modules.findByTypeName('StickerDetailActionSheet') as {
         type(props: {
             renderableSticker: {
@@ -178,230 +178,211 @@ export function patchRealify({ revenge: { modules }, cleanup, storage, patcher }
         return null
     }
 
-    cleanup(
-        patcher.after(
-            RowManager,
-            'generate',
-            (_, row) => {
-                if (row.type !== 1 || !row.message) return
-                const { message } = row
+    patcher.after(
+        RowManager,
+        'generate',
+        (_, row) => {
+            if (row.type !== 1 || !row.message) return
+            const { message } = row
 
-                const membeds = message.embeds ?? []
-                const removeEmbeds = new Set<number>()
+            const membeds = message.embeds ?? []
+            const removeEmbeds = new Set<number>()
 
-                // look for embed emotes & stickers
-                const emojis = new Map<string, FakeEmoji>()
-                const stickers = new Map<string, FakeSticker>()
-                for (const i in membeds) {
-                    const embed = membeds[i]!
-                    if (embed.type !== 'image' || !embed.url) continue
+            // look for embed emotes & stickers
+            const emojis = new Map<string, FakeEmoji>()
+            const stickers = new Map<string, FakeSticker>()
+            for (const i in membeds) {
+                const embed = membeds[i]!
+                if (embed.type !== 'image' || !embed.url) continue
 
-                    const fakeEmoji = findFakeEmoji(embed.url, id => emojis.get(id))
-                    if (fakeEmoji) {
-                        removeEmbeds.add(Number(i))
-                        emojis.set(fakeEmoji.id, fakeEmoji)
-                    }
-
-                    const fakeSticker = findFakeSticker(embed.url, id => stickers.get(id))
-                    if (fakeSticker) {
-                        removeEmbeds.add(Number(i))
-                        stickers.set(fakeSticker.id, fakeSticker)
-                    }
+                const fakeEmoji = findFakeEmoji(embed.url, id => emojis.get(id))
+                if (fakeEmoji) {
+                    removeEmbeds.add(Number(i))
+                    emojis.set(fakeEmoji.id, fakeEmoji)
                 }
 
-                // remove embeds
-                message.embeds = membeds.filter((_, i) => !removeEmbeds.has(i))
+                const fakeSticker = findFakeSticker(embed.url, id => stickers.get(id))
+                if (fakeSticker) {
+                    removeEmbeds.add(Number(i))
+                    stickers.set(fakeSticker.id, fakeSticker)
+                }
+            }
 
-                // yay!
-                if (!message.content?.length)
-                    message.content = [...emojis.values()].map(({ id, name, src, animated }) => ({
-                        type: 'customEmoji',
-                        id,
-                        alt: name + isFakerAlt,
-                        src,
-                        frozenSrc: src.replace('.gif', '.webp'),
-                        animated,
-                        jumboable: emojis.size <= 30,
-                    }))
-                // nay!
-                else {
-                    let isJumboable = true
-                    function recursiveCheck(contents: ContentSkeleton[] | ContentSkeleton[][]) {
-                        for (const i in contents) {
-                            const cnt = contents[i]
-                            if (!cnt) continue
+            // remove embeds
+            message.embeds = membeds.filter((_, i) => !removeEmbeds.has(i))
 
-                            if (Array.isArray(cnt)) recursiveCheck(cnt)
-                            else {
-                                if ('type' in cnt && cnt.type === 'link') {
-                                    if (typeof cnt.target === 'string') {
-                                        const e = findFakeEmoji(cnt.target, id => emojis.get(id))
-                                        if (e) {
-                                            emojis.set(e.id, e)
+            // yay!
+            if (!message.content?.length)
+                message.content = [...emojis.values()].map(({ id, name, src, animated }) => ({
+                    type: 'customEmoji',
+                    id,
+                    alt: name + isFakerAlt,
+                    src,
+                    frozenSrc: src.replace('.gif', '.webp'),
+                    animated,
+                    jumboable: emojis.size <= 30,
+                }))
+            // nay!
+            else {
+                let isJumboable = true
+                function recursiveCheck(contents: ContentSkeleton[] | ContentSkeleton[][]) {
+                    for (const i in contents) {
+                        const cnt = contents[i]
+                        if (!cnt) continue
 
+                        if (Array.isArray(cnt)) recursiveCheck(cnt)
+                        else {
+                            if ('type' in cnt && cnt.type === 'link') {
+                                if (typeof cnt.target === 'string') {
+                                    const e = findFakeEmoji(cnt.target, id => emojis.get(id))
+                                    if (e) {
+                                        emojis.set(e.id, e)
+
+                                        contents[i] = {
+                                            type: 'customEmoji',
+                                            id: e.id,
+                                            alt: e.name + isFakerAlt,
+                                            src: e.src,
+                                            frozenSrc: e.src.replace('.gif', '.webp'),
+                                            get jumboable() {
+                                                return isJumboable
+                                            },
+                                            animated: e.animated,
+                                        }
+                                    } else {
+                                        const s = findFakeSticker(cnt.target, id => stickers.get(id))
+                                        if (s) {
+                                            stickers.set(s.id, s)
                                             contents[i] = {
-                                                type: 'customEmoji',
-                                                id: e.id,
-                                                alt: e.name + isFakerAlt,
-                                                src: e.src,
-                                                frozenSrc: e.src.replace('.gif', '.webp'),
-                                                get jumboable() {
-                                                    return isJumboable
-                                                },
-                                                animated: e.animated,
-                                            }
-                                        } else {
-                                            const s = findFakeSticker(cnt.target, id => stickers.get(id))
-                                            if (s) {
-                                                stickers.set(s.id, s)
-                                                contents[i] = {
-                                                    type: 'text',
-                                                    content: '',
-                                                }
+                                                type: 'text',
+                                                content: '',
                                             }
                                         }
                                     }
-                                } else if ('content' in cnt && Array.isArray(cnt.content)) recursiveCheck(cnt.content)
-                                else if ('items' in cnt && Array.isArray(cnt.items)) recursiveCheck(cnt.items)
-                            }
+                                }
+                            } else if ('content' in cnt && Array.isArray(cnt.content)) recursiveCheck(cnt.content)
+                            else if ('items' in cnt && Array.isArray(cnt.items)) recursiveCheck(cnt.items)
                         }
-
-                        if (shouldDebug) console.log('Rec check ', contents)
-
-                        if (
-                            contents.find(
-                                x =>
-                                    x &&
-                                    (!('type' in x) ||
-                                        (x.type === 'text' && x.content?.length > 0) ||
-                                        x.type !== 'customEmoji'),
-                            ) ||
-                            contents.filter(x => x && 'type' in x && x.type === 'customEmoji').length > 30
-                        )
-                            isJumboable = false
                     }
 
-                    if (shouldDebug ? DebuggerContext.connected : true) recursiveCheck(message.content)
-                }
+                    if (shouldDebug) console.log('Rec check ', contents)
 
-                // check attachments for stickers
-                const mattachments = message.attachments ?? []
-                const removeAttachments = new Set<number>()
-                for (const i in mattachments) {
-                    if (!storage.stickers.realify || !storage.stickers.enabled) continue
-
-                    const attachment = mattachments[i]!
                     if (
-                        attachment.attachmentType !== 'image' ||
-                        !attachment.filename.endsWith('.gif') ||
-                        !attachment.isAnimated ||
-                        !attachment.width ||
-                        !attachment.height
+                        contents.find(
+                            x =>
+                                x &&
+                                (!('type' in x) ||
+                                    (x.type === 'text' && x.content?.length > 0) ||
+                                    x.type !== 'customEmoji'),
+                        ) ||
+                        contents.filter(x => x && 'type' in x && x.type === 'customEmoji').length > 30
                     )
-                        continue
-
-                    if (attachmentUrlRegex.test(attachment.url)) {
-                        const id = attachment.filename.slice(0, -4)
-                        if (!id || !getStickerById(id)) continue
-
-                        if (stickers.get(id)) {
-                            removeAttachments.add(Number(i))
-                            continue
-                        }
-
-                        const name = getStickerById(id)?.name ?? attachment.description ?? 'FakeSticker'
-
-                        removeAttachments.add(Number(i))
-                        stickers.set(id, {
-                            format_type: 4,
-                            name,
-                            id,
-                            src: attachment.url,
-                            width: attachment.width,
-                            height: attachment.height,
-                        })
-                    }
+                        isJumboable = false
                 }
 
-                // remove attachments
-                message.attachments = mattachments.filter((_, i) => !removeAttachments.has(i))
+                if (shouldDebug ? DebuggerContext.connected : true) recursiveCheck(message.content)
+            }
 
-                // add stickers
-                if (stickers.size) {
-                    message.stickers ??= []
-                    for (const { format_type, name, id, src, width, height } of stickers.values())
-                        message.stickers.push({
-                            format_type,
-                            id,
-                            asset: id,
-                            name: name + isFakerAlt,
-                            url: src,
-                            width,
-                            height,
-                            renderMode: 0,
-                        })
-                }
+            // check attachments for stickers
+            const mattachments = message.attachments ?? []
+            const removeAttachments = new Set<number>()
+            for (const i in mattachments) {
+                if (!storage.stickers.realify || !storage.stickers.enabled) continue
 
-                return row
-            },
-            'realify.RowGenerator',
-        ),
-
-        patcher.before(
-            // biome-ignore lint/suspicious/noExplicitAny: View typings arent really accurate
-            View as any,
-            'render',
-            args => {
-                const props = args?.[0]
-
-                // View containing emoji name + subtitle
-                const textMain = props?.children?.[0]?.props
-                const textSub = props?.children?.[1]?.props
-
-                const isEmoji = textMain?.children?.endsWith?.(':')
+                const attachment = mattachments[i]!
                 if (
-                    textMain?.children?.endsWith?.(isEmoji ? `${isFakerAlt}:` : isFakerAlt) &&
-                    textMain?.color === 'header-primary' &&
-                    textMain?.variant === (isEmoji ? 'text-md/bold' : 'heading-md/extrabold') &&
-                    textSub?.children &&
-                    textSub?.variant === 'text-sm/medium'
-                ) {
-                    textMain.children = isEmoji
-                        ? `${textMain.children.slice(0, -(isFakerAlt.length + 1))}:`
-                        : textMain.children.slice(0, -isFakerAlt.length)
-                    textSub.children += ` This is a FreeNitro ${isEmoji ? 'emoji' : 'sticker'} and renders like a real ${isEmoji ? 'emoji' : 'sticker'} only to you. Appears as a link to non-plugin users.`
+                    attachment.attachmentType !== 'image' ||
+                    !attachment.filename.endsWith('.gif') ||
+                    !attachment.isAnimated ||
+                    !attachment.width ||
+                    !attachment.height
+                )
+                    continue
 
-                    return args
+                if (attachmentUrlRegex.test(attachment.url)) {
+                    const id = attachment.filename.slice(0, -4)
+                    if (!id || !getStickerById(id)) continue
+
+                    if (stickers.get(id)) {
+                        removeAttachments.add(Number(i))
+                        continue
+                    }
+
+                    const name = getStickerById(id)?.name ?? attachment.description ?? 'FakeSticker'
+
+                    removeAttachments.add(Number(i))
+                    stickers.set(id, {
+                        format_type: 4,
+                        name,
+                        id,
+                        src: attachment.url,
+                        width: attachment.width,
+                        height: attachment.height,
+                    })
                 }
-            },
-            'realify.View',
-        ),
-        patcher.after(
-            StickerDetailActionSheet,
-            'type',
-            ([props], ret) => {
-                const sticker = ret?.props?.children?.props?.children?.props?.sticker
-                if (sticker?.name && props?.renderableSticker?.name) {
-                    sticker.name = props.renderableSticker.name
-                    return ret
-                }
-            },
-            'realify.StickerDetailActionSheet',
-        ),
+            }
 
-        // patcher.before(
-        //     BottomSheet,
-        //     'render',
-        //     args => {
-        //         const data = args[0]?.children?.props?.children?.props
-        //         if (data?.emojiNode?.alt?.endsWith(isFakerAlt) && data?.emojiNode?.src && data?.emojiNode?.id) {
-        //             data.emojiNode.alt = 'meowwww'
-        //             console.log(data.children)
-        //         }
+            // remove attachments
+            message.attachments = mattachments.filter((_, i) => !removeAttachments.has(i))
 
-        //         return args
-        //     },
-        //     'realify.BottomSheet',
-        // ),
+            // add stickers
+            if (stickers.size) {
+                message.stickers ??= []
+                for (const { format_type, name, id, src, width, height } of stickers.values())
+                    message.stickers.push({
+                        format_type,
+                        id,
+                        asset: id,
+                        name: name + isFakerAlt,
+                        url: src,
+                        width,
+                        height,
+                        renderMode: 0,
+                    })
+            }
+
+            return row
+        },
+        'realify.RowGenerator',
+    )
+    patcher.before(
+        View as any,
+        'render',
+        args => {
+            const props = args?.[0]
+
+            // View containing emoji name + subtitle
+            const textMain = props?.children?.[0]?.props
+            const textSub = props?.children?.[1]?.props
+
+            const isEmoji = textMain?.children?.endsWith?.(':')
+            if (
+                textMain?.children?.endsWith?.(isEmoji ? `${isFakerAlt}:` : isFakerAlt) &&
+                textMain?.color === 'header-primary' &&
+                textMain?.variant === (isEmoji ? 'text-md/bold' : 'heading-md/extrabold') &&
+                textSub?.children &&
+                textSub?.variant === 'text-sm/medium'
+            ) {
+                textMain.children = isEmoji
+                    ? `${textMain.children.slice(0, -(isFakerAlt.length + 1))}:`
+                    : textMain.children.slice(0, -isFakerAlt.length)
+                textSub.children += ` This is a FreeNitro ${isEmoji ? 'emoji' : 'sticker'} and renders like a real ${isEmoji ? 'emoji' : 'sticker'} only to you. Appears as a link to non-plugin users.`
+
+                return args
+            }
+        },
+        'realify.View',
+    )
+    patcher.after(
+        StickerDetailActionSheet,
+        'type',
+        ([props], ret) => {
+            const sticker = ret?.props?.children?.props?.children?.props?.sticker
+            if (sticker?.name && props?.renderableSticker?.name) {
+                sticker.name = props.renderableSticker.name
+                return ret
+            }
+        },
+        'realify.StickerDetailActionSheet',
     )
 }

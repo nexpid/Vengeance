@@ -17,7 +17,7 @@ const FormCheckboxRow =
     >('FormCheckboxRow')!
 
 export function patchFakeify(
-    { revenge: { modules }, patcher, storage, cleanup }: FreeNitroPluginContext,
+    { revenge: { modules }, patcher, storage }: FreeNitroPluginContext,
     emojiPickerOpen: { current: Set<string> },
 ) {
     const messagesModule = modules.findByProps('sendMessage', 'editMessage') as {
@@ -110,154 +110,150 @@ export function patchFakeify(
         return !e.animated && e.guildId === guildId()
     }
 
-    cleanup(
-        // TODO upload sticker as image :!!!!!
-        patcher.instead(
-            messagesModule,
-            'sendStickers',
-            async function (args, original) {
-                if (!storage.stickers.enabled) return original.apply(this, args)
+    // TODO upload sticker as image :!!!!!
+    patcher.instead(
+        messagesModule,
+        'sendStickers',
+        async function (args, original) {
+            if (!storage.stickers.enabled) return original.apply(this, args)
 
-                const [channelId, stickerIds, extra, something] = args
-                const stickers = stickerIds.map(id => {
-                    const sticker = getStickerById(id)
+            const [channelId, stickerIds, extra, something] = args
+            const stickers = stickerIds.map(id => {
+                const sticker = getStickerById(id)
 
-                    const canUseStickers =
-                        getPremiumSubscription() && !storage.bypassNitroCheck && hasExternalStickerPerms(channelId)
-                    if (
-                        !sticker ||
-                        'pack_id' in sticker ||
-                        (sticker.available && (canUseStickers || sticker.guild_id === guildId()))
-                    )
-                        return
+                const canUseStickers =
+                    getPremiumSubscription() && !storage.bypassNitroCheck && hasExternalStickerPerms(channelId)
+                if (
+                    !sticker ||
+                    'pack_id' in sticker ||
+                    (sticker.available && (canUseStickers || sticker.guild_id === guildId()))
+                )
+                    return
 
-                    const link = `https://media.discordapp.net/stickers/${id}.${sticker.format_type === 4 ? 'gif' : 'png'}?size=${storage.stickers.size}&name=${encodeURIComponent(sticker.name)}`
-                    return storage.hyperlinks ? `[${sticker.name}](${link})` : link
-                })
+                const link = `https://media.discordapp.net/stickers/${id}.${sticker.format_type === 4 ? 'gif' : 'png'}?size=${storage.stickers.size}&name=${encodeURIComponent(sticker.name)}`
+                return storage.hyperlinks ? `[${sticker.name}](${link})` : link
+            })
 
-                if (stickers[0]) {
-                    if (!hasEmbedLinksPerms(channelId) && !storage.ignoreEmbeds)
-                        if (!(await showNoEmbedPermsAlert(() => (storage.ignoreEmbeds = true))))
-                            return await Promise.reject()
-
-                    return await messagesModule.sendMessage(
-                        channelId,
-                        {
-                            content: stickers.join(' '),
-                        },
-                        extra,
-                        something,
-                    )
-                }
-                return await original.apply(this, args)
-            },
-            'fakeify.sendStickers',
-        ),
-
-        // Fake emojis unlocked when EmojiPickerList is open
-        patcher.instead(
-            EmojiPickerList,
-            'type',
-            function (args, original) {
-                const [props] = args
-                if (!storage.emoji.enabled || !props?.categories || !props.channel) return original.apply(this, args)
-
-                for (const category of props.categories) {
-                    category.isNitroLocked = false
-                    category.emojisDisabled?.clear()
-                }
-
-                // biome-ignore lint/correctness/useExhaustiveDependencies: onMount/onUnmount
-                useEffect(() => {
-                    emojiPickerOpen.current.add('picker')
-                    return () => void emojiPickerOpen.current.delete('picker')
-                }, [])
-
-                return original.apply(this, args)
-            },
-            'fakeify.EmojiPickerList',
-        ),
-        // Fake emojis unlocked when chat has content
-        patcher.before(
-            ChatInputSendButton,
-            'type',
-            ([{ messageHasContent }]) =>
-                void (messageHasContent ? emojiPickerOpen.current.add('chat') : emojiPickerOpen.current.delete('chat')),
-            'fakeify.ChatInputSendButton',
-        ),
-
-        patcher.instead(
-            messagesModule,
-            'sendMessage',
-            async function (args, original) {
-                if (!storage.emoji.enabled) return await original.apply(this, args)
-                const [channelId, data] = args
-
-                let didBypass = false
-
-                let i = -1
-                const didIs = new Set<number>()
-                for (const emoji of data.validNonShortcutEmojis ?? []) {
-                    i++
-                    if (canUseEmote(emoji, channelId)) continue
-
-                    didBypass = true
-                    const emojiString = `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>`
-
-                    const link = `https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}?size=${storage.emoji.size}&name=${encodeURIComponent(emoji.name)}`
-                    const text = storage.hyperlinks ? `[${emoji.name}](${link})` : link
-
-                    data.content = data.content.replace(emojiString, text)
-                    didIs.add(i)
-                }
-                if (data.validNonShortcutEmojis)
-                    data.validNonShortcutEmojis = data.validNonShortcutEmojis.filter((_, i) => !didIs.has(i))
-
-                if (didBypass && !hasEmbedLinksPerms(channelId) && !storage.ignoreEmbeds)
+            if (stickers[0]) {
+                if (!hasEmbedLinksPerms(channelId) && !storage.ignoreEmbeds)
                     if (!(await showNoEmbedPermsAlert(() => (storage.ignoreEmbeds = true))))
                         return await Promise.reject()
 
-                return await original.apply(this, args)
-            },
-            'fakeify.sendMessage',
-        ),
-        patcher.instead(
-            messagesModule,
-            'editMessage',
-            async function (args, original) {
-                if (!storage.emoji.enabled) return await original.apply(this, args)
-                const [channelId, _, data] = args
+                return await messagesModule.sendMessage(
+                    channelId,
+                    {
+                        content: stickers.join(' '),
+                    },
+                    extra,
+                    something,
+                )
+            }
+            return await original.apply(this, args)
+        },
+        'fakeify.sendStickers',
+    )
 
-                let didBypass = false
+    // Fake emojis unlocked when EmojiPickerList is open
+    patcher.instead(
+        EmojiPickerList,
+        'type',
+        function (args, original) {
+            const [props] = args
+            if (!storage.emoji.enabled || !props?.categories || !props.channel) return original.apply(this, args)
 
-                let i = -1
-                const didIs = new Set<number>()
-                for (const emoji of data.validNonShortcutEmojis ?? []) {
-                    i++
-                    if (canUseEmote(emoji, channelId)) continue
+            for (const category of props.categories) {
+                category.isNitroLocked = false
+                category.emojisDisabled?.clear()
+            }
 
-                    didBypass = true
-                    const emojiString = `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>`
+            // biome-ignore lint/correctness/useExhaustiveDependencies: onMount/onUnmount
+            useEffect(() => {
+                emojiPickerOpen.current.add('picker')
+                return () => void emojiPickerOpen.current.delete('picker')
+            }, [])
 
-                    const link = `https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}?size=${storage.emoji.size}`
-                    const text = storage.hyperlinks
-                        ? `[${emoji.name}](${link})`
-                        : `${link}&name=${encodeURIComponent(emoji.name)}`
+            return original.apply(this, args)
+        },
+        'fakeify.EmojiPickerList',
+    )
+    // Fake emojis unlocked when chat has content
+    patcher.before(
+        ChatInputSendButton,
+        'type',
+        ([{ messageHasContent }]) =>
+            void (messageHasContent ? emojiPickerOpen.current.add('chat') : emojiPickerOpen.current.delete('chat')),
+        'fakeify.ChatInputSendButton',
+    )
 
-                    data.content = data.content.replace(emojiString, text)
-                    didIs.add(i)
-                }
-                if (data.validNonShortcutEmojis)
-                    data.validNonShortcutEmojis = data.validNonShortcutEmojis.filter((_, i) => !didIs.has(i))
+    patcher.instead(
+        messagesModule,
+        'sendMessage',
+        async function (args, original) {
+            if (!storage.emoji.enabled) return await original.apply(this, args)
+            const [channelId, data] = args
 
-                if (didBypass && !hasEmbedLinksPerms(channelId) && !storage.ignoreEmbeds)
-                    if (!(await showNoEmbedPermsAlert(() => (storage.ignoreEmbeds = true))))
-                        return await Promise.reject()
+            let didBypass = false
 
-                return await original.apply(this, args)
-            },
-            'fakeify.editMessage',
-        ),
+            let i = -1
+            const didIs = new Set<number>()
+            for (const emoji of data.validNonShortcutEmojis ?? []) {
+                i++
+                if (canUseEmote(emoji, channelId)) continue
+
+                didBypass = true
+                const emojiString = `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>`
+
+                const link = `https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}?size=${storage.emoji.size}&name=${encodeURIComponent(emoji.name)}`
+                const text = storage.hyperlinks ? `[${emoji.name}](${link})` : link
+
+                data.content = data.content.replace(emojiString, text)
+                didIs.add(i)
+            }
+            if (data.validNonShortcutEmojis)
+                data.validNonShortcutEmojis = data.validNonShortcutEmojis.filter((_, i) => !didIs.has(i))
+
+            if (didBypass && !hasEmbedLinksPerms(channelId) && !storage.ignoreEmbeds)
+                if (!(await showNoEmbedPermsAlert(() => (storage.ignoreEmbeds = true)))) return await Promise.reject()
+
+            return await original.apply(this, args)
+        },
+        'fakeify.sendMessage',
+    )
+    patcher.instead(
+        messagesModule,
+        'editMessage',
+        async function (args, original) {
+            if (!storage.emoji.enabled) return await original.apply(this, args)
+            const [channelId, _, data] = args
+
+            let didBypass = false
+
+            let i = -1
+            const didIs = new Set<number>()
+            for (const emoji of data.validNonShortcutEmojis ?? []) {
+                i++
+                if (canUseEmote(emoji, channelId)) continue
+
+                didBypass = true
+                const emojiString = `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>`
+
+                const link = `https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? 'gif' : 'webp'}?size=${storage.emoji.size}`
+                const text = storage.hyperlinks
+                    ? `[${emoji.name}](${link})`
+                    : `${link}&name=${encodeURIComponent(emoji.name)}`
+
+                data.content = data.content.replace(emojiString, text)
+                didIs.add(i)
+            }
+            if (data.validNonShortcutEmojis)
+                data.validNonShortcutEmojis = data.validNonShortcutEmojis.filter((_, i) => !didIs.has(i))
+
+            if (didBypass && !hasEmbedLinksPerms(channelId) && !storage.ignoreEmbeds)
+                if (!(await showNoEmbedPermsAlert(() => (storage.ignoreEmbeds = true)))) return await Promise.reject()
+
+            return await original.apply(this, args)
+        },
+        'fakeify.editMessage',
     )
 }
 

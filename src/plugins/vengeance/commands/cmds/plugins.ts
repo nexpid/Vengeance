@@ -1,7 +1,7 @@
 import type { SimpleCommand } from '..'
 import { messages } from '@revenge-mod/modules/common'
 import { ApplicationCommandInputType, ApplicationCommandOptionType } from 'libraries/modules/src/commands'
-import { plugins } from 'libraries/plugins/src/internals'
+import { registeredPlugins } from 'libraries/plugins/src/internals'
 
 export default (<SimpleCommand>{
     inputType: ApplicationCommandInputType.BuiltIn,
@@ -15,7 +15,7 @@ export default (<SimpleCommand>{
         },
     ],
     execute([ephemeral], ctx) {
-        const allPlugins = Object.values(plugins)
+        const allPlugins = Object.values(registeredPlugins)
         const externalPlugins = allPlugins.filter(plugin => !plugin.core && plugin.enabled)
         const vengeancePlugins = allPlugins.filter(
             plugin => plugin.core && plugin.id.startsWith('vengeance.') && plugin.manageable && plugin.enabled,

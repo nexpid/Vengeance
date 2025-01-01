@@ -1,7 +1,7 @@
 import { getAssetIndexByName } from '@revenge-mod/assets'
 import { createStyles, openAlert } from '@revenge-mod/modules/common'
 import { AlertActionButton, AlertModal, Card, Stack, Text } from '@revenge-mod/modules/common/components'
-import { registerPlugin, plugins as _plugins } from '@revenge-mod/plugins/internals'
+import { registerPlugin, registeredPlugins } from '@revenge-mod/plugins/internals'
 import { SemanticColor } from '@revenge-mod/ui/colors'
 import { Image } from 'react-native'
 
@@ -15,8 +15,10 @@ registerPlugin<{
         id: 'vengeance.pluginnotifier',
         version: '1.0.0',
         icon: 'PencilSparkleIcon',
+    },
+    {
         afterAppRender({ storage }) {
-            const plugs = Object.entries(_plugins)
+            const plugs = Object.entries(registeredPlugins)
 
             storage.checkedPlugins = storage.checkedPlugins.filter(x => plugs.find(([key]) => x === key))
 
@@ -32,14 +34,11 @@ registerPlugin<{
         },
         initializeStorage() {
             return {
-                checkedPlugins: Object.keys(_plugins),
+                checkedPlugins: Object.keys(registeredPlugins),
             }
         },
     },
-    true,
-    true,
-    undefined,
-    true,
+    { core: true, manageable: true, enabled: true },
 )
 
 const useAlertStyles = createStyles({
@@ -51,7 +50,7 @@ const useAlertStyles = createStyles({
     },
 })
 
-function NewPluginsAlert({ plugins }: { plugins: (typeof _plugins)[string][] }) {
+function NewPluginsAlert({ plugins }: { plugins: (typeof registeredPlugins)[string][] }) {
     const styles = useAlertStyles()
 
     return (

@@ -2,7 +2,7 @@ import { lazyValue } from '@revenge-mod/utils/lazy'
 import type { SimpleCommand } from '..'
 import { messages } from '@revenge-mod/modules/common'
 import { ApplicationCommandInputType, ApplicationCommandOptionType } from 'libraries/modules/src/commands'
-import { plugins } from 'libraries/plugins/src/internals'
+import { registeredPlugins } from 'libraries/plugins/src/internals'
 import { Platform } from 'react-native'
 import { findByProps, findProp } from '@revenge-mod/modules/finders'
 import { ClientInfoModule } from '@revenge-mod/modules/native'
@@ -68,11 +68,10 @@ export default (<SimpleCommand>{
         const ephemeral = args.find(a => a.name === 'ephemeral')
         const color = args.find(a => a.name === 'color')
 
-        // biome-ignore lint/suspicious/noExplicitAny: RN weird types
         const PlatformConstants = Platform.constants as any
         const isOutdated = !(Number(ClientInfoModule.Build) > MinimumSupportedBuildNumber)
 
-        const allPlugins = Object.values(plugins)
+        const allPlugins = Object.values(registeredPlugins)
         const externalPlugins = allPlugins.filter(plugin => !plugin.core && plugin.enabled)
         const vengeancePlugins = allPlugins.filter(
             plugin => plugin.core && plugin.id.startsWith('vengeance.') && plugin.manageable && plugin.enabled,

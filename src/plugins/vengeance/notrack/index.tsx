@@ -17,24 +17,23 @@ registerPlugin<{
         id: 'vengeance.notrack',
         version: '1.0.0',
         icon: 'EyeIcon',
-        beforeAppRender({ revenge: { modules }, patcher, cleanup, storage }) {
-            // biome-ignore lint/suspicious/noExplicitAny: HTTP module can be anything
+    },
+    {
+        beforeAppRender({ revenge: { modules }, patcher, storage }) {
             const http = modules.findByProps('HTTP', 'post') as any
 
-            cleanup(
-                patcher.instead(
-                    http.HTTP,
-                    'post',
-                    (args, original) => {
-                        const { url } = args?.[0] ?? {}
-                        if (url?.startsWith('/science') && storage.blockScience) {
-                            if (storage.countRequests) storage.blockedRequests++
-                            return Promise.resolve()
-                        }
-                        return original.apply(this, args)
-                    },
-                    'http.post',
-                ),
+            patcher.instead(
+                http.HTTP,
+                'post',
+                (args, original) => {
+                    const { url } = args?.[0] ?? {}
+                    if (url?.startsWith('/science') && storage.blockScience) {
+                        if (storage.countRequests) storage.blockedRequests++
+                        return Promise.resolve()
+                    }
+                    return original.apply(this, args)
+                },
+                'http.post',
             )
         },
         initializeStorage() {
@@ -82,8 +81,5 @@ registerPlugin<{
             )
         },
     },
-    true,
-    true,
-    undefined,
-    true,
+    { core: true, manageable: true, enabled: true },
 )

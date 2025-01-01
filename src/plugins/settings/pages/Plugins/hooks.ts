@@ -4,9 +4,9 @@ import { useMemo } from 'react'
 export function useFilteredPlugins<const P extends PluginManifest & { core?: boolean }>(
     plugins: P[],
     query: string,
-    options: { showCorePlugins: boolean; sortMode: 'asc' | 'dsc' },
+    options: { showCorePlugins: boolean; showVengeancePlugins: boolean; sortMode: 'asc' | 'dsc' },
 ) {
-    const { showCorePlugins, sortMode } = options
+    const { showCorePlugins, showVengeancePlugins, sortMode } = options
 
     const _plugins = useMemo(
         () =>
@@ -21,11 +21,22 @@ export function useFilteredPlugins<const P extends PluginManifest & { core?: boo
     )
 
     const externalPlugins = useMemo(() => _plugins.filter(plugin => !plugin.core), [_plugins])
-    const corePlugins = useMemo(() => _plugins.filter(plugin => plugin.core), [_plugins])
-    const empty = !(showCorePlugins ? corePlugins.length + externalPlugins.length : externalPlugins.length)
+    const vengeancePlugins = useMemo(
+        () => _plugins.filter(plugin => plugin.core && plugin.id.startsWith('vengeance.')),
+        [_plugins],
+    )
+    const corePlugins = useMemo(
+        () => _plugins.filter(plugin => plugin.core && !plugin.id.startsWith('vengeance.')),
+        [_plugins],
+    )
+    const empty = ![
+        showCorePlugins && corePlugins.length,
+        showVengeancePlugins && vengeancePlugins.length,
+        externalPlugins.length,
+    ].reduce<number>((a, b) => a + (b || 0), 0)
 
     // TODO: Maybe create 2 separate data lists for non-filtered and filtered plugins
     const noSearchResults = empty && !!query
 
-    return { plugins: _plugins, externalPlugins, corePlugins, empty, noSearchResults }
+    return { plugins: _plugins, externalPlugins, vengeancePlugins, corePlugins, empty, noSearchResults }
 }

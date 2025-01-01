@@ -41,8 +41,8 @@ export default function PluginsSettingsPage() {
     useObservable([pluginsStates, storage, externalPluginsMetadata])
 
     const [query, setQuery] = useState('')
-    const { showCorePlugins, sortMode } = storage.plugins
-    const { externalPlugins, corePlugins, empty, noSearchResults } = useFilteredPlugins(
+    const { showCorePlugins, showVengeancePlugins, sortMode } = storage.plugins
+    const { externalPlugins, vengeancePlugins, corePlugins, empty, noSearchResults } = useFilteredPlugins(
         Object.values(registeredPlugins),
         query,
         storage.plugins,
@@ -71,6 +71,12 @@ export default function PluginsSettingsPage() {
                           ]),
                     [
                         {
+                            label: 'Show Vengeance plugins',
+                            IconComponent: showVengeancePlugins ? CheckmarkLargeIcon : undefined,
+                            variant: 'destructive',
+                            action: () => (storage.plugins.showVengeancePlugins = !showVengeancePlugins),
+                        },
+                        {
                             label: 'Show core plugins',
                             IconComponent: showCorePlugins ? CheckmarkLargeIcon : undefined,
                             variant: 'destructive',
@@ -86,7 +92,9 @@ export default function PluginsSettingsPage() {
 
     return (
         <PageWrapper withTopControls>
-            <PluginSettingsPageContext.Provider value={{ setQuery, showCorePlugins, sortMode, ContextMenuComponent }}>
+            <PluginSettingsPageContext.Provider
+                value={{ setQuery, showCorePlugins, showVengeancePlugins, sortMode, ContextMenuComponent }}
+            >
                 <Stack spacing={16} style={styles.grow}>
                     <Show when={!empty || noSearchResults} fallback={<NoPlugins />}>
                         <PluginListSearchInput />
@@ -100,6 +108,13 @@ export default function PluginsSettingsPage() {
                                     data={externalPlugins}
                                     ListItemComponent={InstalledPluginCard}
                                 />
+                                <Show when={showVengeancePlugins}>
+                                    <MasonaryFlashPluginList
+                                        data={vengeancePlugins}
+                                        header={<TableRowGroupTitle title="Vengeance Plugins" />}
+                                        ListItemComponent={InstalledPluginCard}
+                                    />
+                                </Show>
                                 <Show when={showCorePlugins}>
                                     <MasonaryFlashPluginList
                                         data={corePlugins}

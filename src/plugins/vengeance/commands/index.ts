@@ -37,50 +37,47 @@ registerPlugin(
         id: 'vengeance.commands',
         version: '1.0.0',
         icon: 'SlashBoxIcon',
-        afterAppRender({ cleanup, patcher }) {
-            cleanup(
-                patcher.after(commands, 'getBuiltInCommands', (_, ret) => {
-                    const lastId = Math.min(...ret.map(a => Number(a.id))) - 1
+    },
+    {
+        afterAppRender({ patcher }) {
+            patcher.after(commands, 'getBuiltInCommands', (_, ret) => {
+                const lastId = Math.min(...ret.map(a => Number(a.id))) - 1
 
-                    const cmdussy = [...cmds]
-                    for (const cmd of cmds)
-                        for (const alias of cmd.aliases ?? [])
-                            cmdussy.push({
-                                ...cmd,
-                                name: alias,
-                            })
+                const cmdussy = [...cmds]
+                for (const cmd of cmds)
+                    for (const alias of cmd.aliases ?? [])
+                        cmdussy.push({
+                            ...cmd,
+                            name: alias,
+                        })
 
-                    return [
-                        ...ret,
-                        ...cmdussy.map(
-                            ({ inputType, name, description, options, execute }, i) =>
-                                ({
-                                    id: (lastId - i).toString(),
-                                    untranslatedName: name,
+                return [
+                    ...ret,
+                    ...cmdussy.map(
+                        ({ inputType, name, description, options, execute }, i) =>
+                            ({
+                                id: (lastId - i).toString(),
+                                untranslatedName: name,
+                                displayName: name,
+                                type: ApplicationCommandType.ChatInput,
+                                inputType,
+                                applicationId: '-1',
+                                untranslatedDescription: description,
+                                displayDescription: description,
+                                options: options.map(({ name, description, type, required }) => ({
+                                    name,
                                     displayName: name,
-                                    type: ApplicationCommandType.ChatInput,
-                                    inputType,
-                                    applicationId: '-1',
-                                    untranslatedDescription: description,
+                                    type,
+                                    description,
                                     displayDescription: description,
-                                    options: options.map(({ name, description, type, required }) => ({
-                                        name,
-                                        displayName: name,
-                                        type,
-                                        description,
-                                        displayDescription: description,
-                                        required,
-                                    })),
-                                    execute,
-                                }) as Command,
-                        ),
-                    ]
-                }),
-            )
+                                    required,
+                                })),
+                                execute,
+                            }) as Command,
+                    ),
+                ]
+            })
         },
     },
-    true,
-    true,
-    undefined,
-    true,
+    { core: true, manageable: true, enabled: true },
 )

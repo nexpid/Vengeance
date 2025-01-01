@@ -16,6 +16,8 @@ registerPlugin(
         id: 'vengeance.palmdevs.messages-tab',
         version: '1.0.0',
         icon: 'ic_message',
+    },
+    {
         beforeAppRender({ patcher, revenge: { modules } }) {
             const Messages = modules.findByFilePath<{ type: FC<{ renderedViaPlugin?: boolean }> }, true>(
                 'modules/main_tabs_v2/native/tabs/messages/Messages.tsx',
@@ -107,6 +109,5 @@ registerPlugin(
             patcher.instead(modules.findProp<{ type: FC }>('Messages', 'DragPreview')!, 'type', () => null)
         },
     },
-    true,
-    true,
+    { core: true, manageable: true },
 )

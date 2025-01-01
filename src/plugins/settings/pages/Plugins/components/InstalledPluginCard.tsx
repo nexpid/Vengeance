@@ -1,42 +1,70 @@
 import { FormSwitch } from '@revenge-mod/ui/components'
 
-import { openAlert } from '@revenge-mod/modules/common'
-import { AlertActionButton, AlertModal } from '@revenge-mod/modules/common/components'
+import { NavigationNative, openAlert } from '@revenge-mod/modules/common'
+import { AlertActionButton, AlertModal, IconButton } from '@revenge-mod/modules/common/components'
 import { BundleUpdaterManager } from '@revenge-mod/modules/native'
 
 import { registeredPlugins } from '@revenge-mod/plugins/internals'
 
-import { useState } from 'react'
+import { useState, type FC } from 'react'
 
 import PluginCard, { type PluginCardProps } from './PluginCard'
+import { getAssetIndexByName } from '@revenge-mod/assets'
 
 // TODO: Settings components
-export default function InstalledPluginCard({ enabled: _enabled, manageable, id, ...props }: InstalledPluginCardProps) {
+// ^ The guy who wrote this is a nerd btw
+export default function InstalledPluginCard({
+    enabled: _enabled,
+    name,
+    manageable,
+    id,
+    SettingsComponent,
+    ...props
+}: InstalledPluginCardProps) {
     const [enabled, setEnabled] = useState(_enabled)
+
+    const navigation = NavigationNative.useNavigation()
 
     return (
         <PluginCard
+            name={name}
             {...props}
             trailing={
-                <FormSwitch
-                    value={enabled}
-                    disabled={!manageable}
-                    onValueChange={async enabled => {
-                        const plugin = registeredPlugins[id]!
+                <>
+                    {SettingsComponent && (
+                        <IconButton
+                            variant="secondary"
+                            size="sm"
+                            icon={getAssetIndexByName('SettingsIcon')}
+                            onPress={() =>
+                                navigation.push('RevengeCustomPage', {
+                                    render: SettingsComponent,
+                                    title: name,
+                                })
+                            }
+                            disabled={!enabled}
+                        />
+                    )}
+                    <FormSwitch
+                        value={enabled}
+                        disabled={!manageable}
+                        onValueChange={async enabled => {
+                            const plugin = registeredPlugins[id]!
 
-                        if (enabled) {
-                            plugin.enable()
-                            if (plugin.lifecycles.beforeAppRender || plugin.lifecycles.subscribeModules)
-                                showReloadRequiredAlert(enabled)
-                            else await plugin.start()
-                        } else {
-                            const { reloadRequired } = plugin.disable()
-                            if (reloadRequired) showReloadRequiredAlert(enabled)
-                        }
+                            if (enabled) {
+                                plugin.enable()
+                                if (plugin.lifecycles.beforeAppRender || plugin.lifecycles.subscribeModules)
+                                    showReloadRequiredAlert(enabled)
+                                else await plugin.start()
+                            } else {
+                                const { reloadRequired } = plugin.disable()
+                                if (reloadRequired) showReloadRequiredAlert(enabled)
+                            }
 
-                        setEnabled(enabled)
-                    }}
-                />
+                            setEnabled(enabled)
+                        }}
+                    />
+                </>
             }
         />
     )
@@ -46,6 +74,7 @@ interface InstalledPluginCardProps extends PluginCardProps {
     id: string
     enabled: boolean
     manageable: boolean
+    SettingsComponent?: FC<any>
 }
 
 function showReloadRequiredAlert(enabling: boolean) {

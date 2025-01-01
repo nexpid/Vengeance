@@ -27,7 +27,6 @@ export default (<SimpleCommand>{
     execute([ephemeral], ctx) {
         const isOutdated = !(Number(ClientInfoModule.Build) > MinimumSupportedBuildNumber)
         const runtimeProps = (HermesInternal as HermesInternalObject).getRuntimeProperties()
-        // biome-ignore lint/suspicious/noExplicitAny: RN weird types
         const PlatformConstants = Platform.constants as any
 
         const content = [

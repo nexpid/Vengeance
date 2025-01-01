@@ -1,9 +1,9 @@
-import { useEffect, type FC } from 'react'
-import type { FreeNitroPluginContext } from '..'
 import { openAlert } from '@revenge-mod/modules/common'
 import { AlertActionButton, AlertModal } from '@revenge-mod/modules/common/components'
-import { FormSwitch } from '@revenge-mod/ui/components'
 import { findProp } from '@revenge-mod/modules/finders'
+import { FormSwitch } from '@revenge-mod/ui/components'
+import { type FC, useEffect } from 'react'
+import type { FreeNitroPluginContext } from '..'
 import type { Emoji, Sticker } from '../types'
 
 const FormCheckboxRow =

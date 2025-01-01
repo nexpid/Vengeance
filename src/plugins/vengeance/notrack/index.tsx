@@ -1,9 +1,9 @@
 import { getAssetIndexByName } from '@revenge-mod/assets'
 import { Card, TableRowGroup, TableRowIcon, TableSwitchRow, Text } from '@revenge-mod/modules/common/components'
-import { useObservable } from '@revenge-mod/storage'
 import { registerPlugin } from '@revenge-mod/plugins/internals'
-import PageWrapper from 'src/plugins/settings/pages/(Wrapper)'
+import { useObservable } from '@revenge-mod/storage'
 import { ScrollView } from 'react-native'
+import PageWrapper from 'src/plugins/settings/pages/(Wrapper)'
 
 registerPlugin<{
     blockedRequests: number

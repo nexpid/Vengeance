@@ -13,10 +13,10 @@ import type {
     ViewStyle,
 } from 'react-native'
 
+import type { Message } from 'discord-types/general'
+import type { Command } from './commands'
 import type { MetroModuleFilePathKey } from './constants'
 import type { lazyContextSymbol } from './utils/lazy'
-import type { Command } from './commands'
-import type { Message } from 'discord-types/general'
 
 /// METRO
 

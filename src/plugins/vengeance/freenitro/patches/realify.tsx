@@ -1,7 +1,7 @@
+import { View } from 'react-native'
 import { DebuggerContext } from 'src/plugins/developer-settings/debugger'
 import type { FreeNitroPluginContext } from '..'
 import type { Emoji, Sticker } from '../types'
-import { View } from 'react-native'
 
 interface FakeEmoji {
     name: string

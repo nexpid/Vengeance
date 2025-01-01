@@ -1,11 +1,11 @@
-import { lazyValue } from '@revenge-mod/utils/lazy'
-import type { SimpleCommand } from '..'
 import { messages } from '@revenge-mod/modules/common'
+import { findByProps, findProp } from '@revenge-mod/modules/finders'
+import { ClientInfoModule } from '@revenge-mod/modules/native'
+import { lazyValue } from '@revenge-mod/utils/lazy'
 import { ApplicationCommandInputType, ApplicationCommandOptionType } from 'libraries/modules/src/commands'
 import { registeredPlugins } from 'libraries/plugins/src/internals'
 import { Platform } from 'react-native'
-import { findByProps, findProp } from '@revenge-mod/modules/finders'
-import { ClientInfoModule } from '@revenge-mod/modules/native'
+import type { SimpleCommand } from '..'
 
 const MinimumSupportedBuildNumber = ReactNative.Platform.select({ default: 254000, ios: 66559 })
 

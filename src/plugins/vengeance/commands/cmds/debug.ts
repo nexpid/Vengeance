@@ -1,10 +1,10 @@
-import type { SimpleCommand } from '..'
-import { Platform } from 'react-native'
 import { messages } from '@revenge-mod/modules/common'
 import { findByProps } from '@revenge-mod/modules/finders'
 import { ClientInfoModule } from '@revenge-mod/modules/native'
 import { lazyValue } from '@revenge-mod/utils/lazy'
 import { ApplicationCommandInputType, ApplicationCommandOptionType } from 'libraries/modules/src/commands'
+import { Platform } from 'react-native'
+import type { SimpleCommand } from '..'
 
 const MinimumSupportedBuildNumber = ReactNative.Platform.select({ default: 254000, ios: 66559 })
 

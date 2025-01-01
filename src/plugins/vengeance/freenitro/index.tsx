@@ -1,4 +1,5 @@
 import { getAssetIndexByName } from '@revenge-mod/assets'
+import { createStyles } from '@revenge-mod/modules/common'
 import {
     Slider,
     TableRow,
@@ -7,13 +8,12 @@ import {
     TableSwitchRow,
     Text,
 } from '@revenge-mod/modules/common/components'
-import { useObservable } from '@revenge-mod/storage'
-import { registerPlugin } from '@revenge-mod/plugins/internals'
-import PageWrapper from 'src/plugins/settings/pages/(Wrapper)'
-import { ScrollView, View } from 'react-native'
-import { createStyles } from '@revenge-mod/modules/common'
-import { SemanticColor } from '@revenge-mod/ui/colors'
 import type { PluginContextFor } from '@revenge-mod/plugins'
+import { registerPlugin } from '@revenge-mod/plugins/internals'
+import { useObservable } from '@revenge-mod/storage'
+import { SemanticColor } from '@revenge-mod/ui/colors'
+import { ScrollView, View } from 'react-native'
+import PageWrapper from 'src/plugins/settings/pages/(Wrapper)'
 import { patchAppIcons } from './patches/extra/appIcons'
 import { patchNitroThemes } from './patches/extra/nitroThemes'
 import { patchFakeify } from './patches/fakeify'

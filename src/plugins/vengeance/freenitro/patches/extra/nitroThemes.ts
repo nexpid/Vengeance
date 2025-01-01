@@ -1,5 +1,5 @@
-import type { FreeNitroPluginContext } from '../..'
 import { FluxDispatcher } from '@revenge-mod/modules/common'
+import type { FreeNitroPluginContext } from '../..'
 
 export function patchNitroThemes({ revenge: { modules }, patcher, storage }: FreeNitroPluginContext) {
     const getPremiumSubscription = modules.findProp<() => null | { type: number }>('getPremiumSubscription')!

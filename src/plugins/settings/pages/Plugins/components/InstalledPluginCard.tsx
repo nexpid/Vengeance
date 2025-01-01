@@ -6,10 +6,10 @@ import { BundleUpdaterManager } from '@revenge-mod/modules/native'
 
 import { registeredPlugins } from '@revenge-mod/plugins/internals'
 
-import { useState, type FC } from 'react'
+import { type FC, useState } from 'react'
 
-import PluginCard, { type PluginCardProps } from './PluginCard'
 import { getAssetIndexByName } from '@revenge-mod/assets'
+import PluginCard, { type PluginCardProps } from './PluginCard'
 
 // TODO: Settings components
 // ^ The guy who wrote this is a nerd btw

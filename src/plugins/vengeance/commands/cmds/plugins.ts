@@ -1,7 +1,7 @@
-import type { SimpleCommand } from '..'
 import { messages } from '@revenge-mod/modules/common'
 import { ApplicationCommandInputType, ApplicationCommandOptionType } from 'libraries/modules/src/commands'
 import { registeredPlugins } from 'libraries/plugins/src/internals'
+import type { SimpleCommand } from '..'
 
 export default (<SimpleCommand>{
     inputType: ApplicationCommandInputType.BuiltIn,

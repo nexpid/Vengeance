@@ -2,7 +2,7 @@ import { messages } from '@revenge-mod/modules/common'
 import { findByProps, findProp } from '@revenge-mod/modules/finders'
 import { ClientInfoModule } from '@revenge-mod/modules/native'
 import { lazyValue } from '@revenge-mod/utils/lazy'
-import { ApplicationCommandInputType, ApplicationCommandOptionType } from 'libraries/modules/src/commands'
+import { ApplicationCommandInputType, ApplicationCommandOptionType } from 'libraries/modules/src/common/commands'
 import { registeredPlugins } from 'libraries/plugins/src/internals'
 import { Platform } from 'react-native'
 import type { SimpleCommand } from '..'
@@ -72,12 +72,12 @@ export default (<SimpleCommand>{
         const isOutdated = !(Number(ClientInfoModule.Build) > MinimumSupportedBuildNumber)
 
         const allPlugins = Object.values(registeredPlugins)
-        const externalPlugins = allPlugins.filter(plugin => !plugin.core && plugin.enabled)
+        const externalPlugins = allPlugins.filter(plugin => plugin.external && plugin.enabled)
         const vengeancePlugins = allPlugins.filter(
-            plugin => plugin.core && plugin.id.startsWith('vengeance.') && plugin.manageable && plugin.enabled,
+            plugin => !plugin.external && plugin.id.startsWith('vengeance.') && plugin.manageable && plugin.enabled,
         )
-        const corePlugins = allPlugins.filter(
-            plugin => plugin.core && !plugin.id.startsWith('vengeance.') && plugin.manageable && plugin.enabled,
+        const internalPlugins = allPlugins.filter(
+            plugin => !plugin.external && !plugin.id.startsWith('vengeance.') && plugin.manageable && plugin.enabled,
         )
         const { username, id } = getCurrentUser() ?? { username: 'johndoe', id: prime.toString() }
 
@@ -107,7 +107,7 @@ export default (<SimpleCommand>{
             plugins: [
                 externalPlugins.length && `${externalPlugins.length} (external)`,
                 vengeancePlugins.length && `${vengeancePlugins.length} (vengeance)`,
-                corePlugins.length && `${corePlugins.length} (core)`,
+                internalPlugins.length && `${internalPlugins.length} (internal)`,
             ]
                 .filter(section => !!section)
                 .join(', '),

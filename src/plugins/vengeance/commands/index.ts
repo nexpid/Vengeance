@@ -8,7 +8,7 @@ import {
     type Command,
     type CommandContext,
     type CommandReturnValue,
-} from 'libraries/modules/src/commands'
+} from 'libraries/modules/src/common/commands'
 import debug from './cmds/debug'
 import plugins from './cmds/plugins'
 import venfetch from './cmds/venfetch'

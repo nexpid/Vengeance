@@ -1,5 +1,5 @@
 import { messages } from '@revenge-mod/modules/common'
-import { ApplicationCommandInputType, ApplicationCommandOptionType } from 'libraries/modules/src/commands'
+import { ApplicationCommandInputType, ApplicationCommandOptionType } from 'libraries/modules/src/common/commands'
 import { registeredPlugins } from 'libraries/plugins/src/internals'
 import type { SimpleCommand } from '..'
 
@@ -16,12 +16,12 @@ export default (<SimpleCommand>{
     ],
     execute([ephemeral], ctx) {
         const allPlugins = Object.values(registeredPlugins)
-        const externalPlugins = allPlugins.filter(plugin => !plugin.core && plugin.enabled)
+        const externalPlugins = allPlugins.filter(plugin => plugin.external && plugin.enabled)
         const vengeancePlugins = allPlugins.filter(
-            plugin => plugin.core && plugin.id.startsWith('vengeance.') && plugin.manageable && plugin.enabled,
+            plugin => !plugin.external && plugin.id.startsWith('vengeance.') && plugin.manageable && plugin.enabled,
         )
-        const corePlugins = allPlugins.filter(
-            plugin => plugin.core && !plugin.id.startsWith('vengeance.') && plugin.manageable && plugin.enabled,
+        const internalPlugins = allPlugins.filter(
+            plugin => !plugin.external && !plugin.id.startsWith('vengeance.') && plugin.manageable && plugin.enabled,
         )
 
         const mapPlugin = (plugin: (typeof allPlugins)[number]) => plugin.name
@@ -31,8 +31,8 @@ export default (<SimpleCommand>{
             externalPlugins.map(mapPlugin).join(',  '),
             vengeancePlugins.length && `> **Vengeance Plugins** (${vengeancePlugins.length})`,
             vengeancePlugins.map(mapPlugin).join(',  '),
-            corePlugins.length && `> **Core Plugins** (${corePlugins.length})`,
-            corePlugins.map(mapPlugin).join(',  '),
+            internalPlugins.length && `> **Internal Plugins** (${internalPlugins.length})`,
+            internalPlugins.map(mapPlugin).join(',  '),
         ]
             .filter(row => !!row)
             .join('\n')

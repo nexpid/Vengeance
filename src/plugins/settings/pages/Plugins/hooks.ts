@@ -41,7 +41,9 @@ export function useFilteredPlugins<const P extends PluginManifest & { external?:
         () =>
             _plugins.filter(
                 plugin =>
-                    !(plugin.external ?? true) && (!options.showUnmanageable ? (plugin.manageable ?? true) : true),
+                    !(plugin.external ?? true) &&
+                    !plugin.id.startsWith('vengeance.') &&
+                    (!options.showUnmanageable ? (plugin.manageable ?? true) : true),
             ),
         [_plugins, options.showUnmanageable],
     )

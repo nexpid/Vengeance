@@ -94,7 +94,7 @@ export default function PluginsSettingsPage() {
                                 <MasonaryFlashPluginList
                                     data={externalPlugins}
                                     ListItemComponent={InstalledPluginCard}
-                                    ListFooterComponent={!showInternal && PluginBrowserCTA}
+                                    ListFooterComponent={!showVengeance && !showInternal && PluginBrowserCTA}
                                 />
                                 <Show when={showVengeance}>
                                     <MasonaryFlashPluginList

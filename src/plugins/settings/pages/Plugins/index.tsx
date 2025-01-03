@@ -64,6 +64,11 @@ export default function PluginsSettingsPage() {
                             IconComponent: showInternal ? CheckmarkLargeIcon : undefined,
                             action: () => (storage.plugins.showInternal = !showInternal),
                         },
+                        {
+                            label: 'Show essential plugins',
+                            IconComponent: showUnmanageable ? CheckmarkLargeIcon : undefined,
+                            action: () => (storage.plugins.showUnmanageable = !showUnmanageable),
+                        },
                     ],
                 ]}
             >
@@ -110,7 +115,7 @@ export default function PluginsSettingsPage() {
                                                     icon={getAssetIndexByName('CircleQuestionIcon-primary')!}
                                                     size="sm"
                                                     variant="tertiary"
-                                                    onPress={showCorePluginsInformationAlert}
+                                                    onPress={showInternalPluginsInformationAlert}
                                                 />
                                             </View>
                                         }
@@ -136,12 +141,12 @@ function PluginBrowserCTA() {
     )
 }
 
-function showCorePluginsInformationAlert() {
+function showInternalPluginsInformationAlert() {
     return openAlert(
         'revenge.plugins.settings.plugins.internal-plugins.description',
         <AlertModal
             title="What are internal plugins?"
-            content="Internal plugins are integrated into Revenge and provide core functionalities, such as this settings menu. Some internal plugins cannot be disabled, as they provide resources required by other plugins."
+            content="Internal plugins are directly integrated into Revenge, and provide core functionalities such as this settings menu. Some internal plugins are essential to provide necessary resources required by other plugins."
             actions={<AlertActionButton text="OK" />}
         />,
     )

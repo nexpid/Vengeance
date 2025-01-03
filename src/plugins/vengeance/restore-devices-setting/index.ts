@@ -19,5 +19,5 @@ registerPlugin(
             patcher.instead(DevicesSetting!, 'usePredicate', () => true)
         },
     },
-    { external: false, manageable: true },
+    { external: false, manageable: true, enabled: false },
 )

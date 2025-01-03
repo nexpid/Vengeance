@@ -3,6 +3,7 @@ import { createStyles, openAlert } from '@revenge-mod/modules/common'
 import { AlertActionButton, AlertModal, Card, Stack, Text } from '@revenge-mod/modules/common/components'
 import { registerPlugin, registeredPlugins } from '@revenge-mod/plugins/internals'
 import { SemanticColor } from '@revenge-mod/ui/colors'
+import _ from 'lodash'
 import { Image } from 'react-native'
 
 registerPlugin<{
@@ -18,7 +19,7 @@ registerPlugin<{
     },
     {
         afterAppRender({ storage }) {
-            const plugs = Object.entries(registeredPlugins)
+            const plugs = Object.entries(registeredPlugins).filter(([_, x]) => !x.external && x.manageable)
 
             storage.checkedPlugins = storage.checkedPlugins.filter(x => plugs.find(([key]) => x === key))
 
@@ -34,7 +35,9 @@ registerPlugin<{
         },
         initializeStorage() {
             return {
-                checkedPlugins: Object.keys(registeredPlugins),
+                checkedPlugins: Object.entries(registeredPlugins)
+                    .filter(([_, x]) => !x.external && x.manageable)
+                    .map(([key]) => key),
             }
         },
     },

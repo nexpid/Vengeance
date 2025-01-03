@@ -7,6 +7,7 @@ declare global {
               wipe(): void
           }
         | undefined
+    var getRidOfPlugin: ((id: string) => boolean) | undefined
 }
 
 export {}

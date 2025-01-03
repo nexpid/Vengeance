@@ -1,50 +1,45 @@
+import { getAssetIndexByName } from '@revenge-mod/assets'
 import { FormSwitch } from '@revenge-mod/ui/components'
 
-import { NavigationNative, openAlert } from '@revenge-mod/modules/common'
+import { openAlert } from '@revenge-mod/modules/common'
 import { AlertActionButton, AlertModal, IconButton } from '@revenge-mod/modules/common/components'
 import { BundleUpdaterManager } from '@revenge-mod/modules/native'
 
 import { registeredPlugins } from '@revenge-mod/plugins/internals'
 
-import { type FC, useState } from 'react'
+import { Show } from '@revenge-mod/shared/components'
+import { useRerenderer } from '@revenge-mod/shared/hooks'
 
-import { getAssetIndexByName } from '@revenge-mod/assets'
+import { useContext } from 'react'
+
 import PluginCard, { type PluginCardProps } from './PluginCard'
+import PluginCardContext from '../contexts/PluginCardContext'
 
-// TODO: Settings components
-// ^ The guy who wrote this is a nerd btw
-export default function InstalledPluginCard({
-    enabled: _enabled,
-    name,
-    manageable,
-    id,
-    SettingsComponent,
-    ...props
-}: InstalledPluginCardProps) {
-    const [enabled, setEnabled] = useState(_enabled)
+export default function InstalledPluginCard(props: PluginCardProps) {
+    const { plugin, navigation } = useContext(PluginCardContext)
+    const { SettingsComponent, enabled, id, manageable, context } = plugin!
 
-    const navigation = NavigationNative.useNavigation()
+    const rerender = useRerenderer()
 
     return (
         <PluginCard
-            name={name}
             {...props}
             trailing={
                 <>
-                    {SettingsComponent && (
+                    <Show when={SettingsComponent}>
                         <IconButton
-                            variant="secondary"
-                            size="sm"
-                            icon={getAssetIndexByName('SettingsIcon')}
-                            onPress={() =>
-                                navigation.push('RevengeCustomPage', {
-                                    render: SettingsComponent,
-                                    title: name,
-                                })
-                            }
                             disabled={!enabled}
+                            icon={getAssetIndexByName('SettingsIcon')}
+                            variant="tertiary"
+                            onPress={() => {
+                                navigation.navigate('RevengeCustomPage', {
+                                    // @ts-expect-error: I love TypeScript
+                                    render: () => <SettingsComponent {...context} />,
+                                })
+                            }}
                         />
-                    )}
+                    </Show>
+                    <IconButton size="sm" icon={getAssetIndexByName('MoreHorizontalIcon')} variant="tertiary" />
                     <FormSwitch
                         value={enabled}
                         disabled={!manageable}
@@ -61,7 +56,7 @@ export default function InstalledPluginCard({
                                 if (reloadRequired) showReloadRequiredAlert(enabled)
                             }
 
-                            setEnabled(enabled)
+                            rerender()
                         }}
                     />
                 </>
@@ -70,16 +65,9 @@ export default function InstalledPluginCard({
     )
 }
 
-interface InstalledPluginCardProps extends PluginCardProps {
-    id: string
-    enabled: boolean
-    manageable: boolean
-    SettingsComponent?: FC<any>
-}
-
 function showReloadRequiredAlert(enabling: boolean) {
     openAlert(
-        'revenge.plugins.reload-required',
+        'revenge.plugins.settings.plugins.reload-required',
         <AlertModal
             title="Reload required"
             content={

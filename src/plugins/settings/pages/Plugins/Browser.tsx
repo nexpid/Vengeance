@@ -7,12 +7,11 @@ import { FolderIcon } from '@revenge-mod/modules/common/components/icons'
 
 import { Show } from '@revenge-mod/shared/components'
 
-import { memo, useEffect, useState } from 'react'
-import { Platform } from 'react-native'
+import { memo, useEffect, useState, type ComponentProps } from 'react'
 
 import InstallablePluginCard from './components/InstallablePluginCard'
 import MasonaryFlashPluginList from './components/MasonaryFlashPluginList'
-import PluginListSearchInput from './components/PluginListSearchInput'
+import PluginListSearchAndFilters from './components/PluginListSearchInputAndFilters'
 import { PluginSettingsPageContext, styles } from './components/shared'
 
 import PageWrapper from '../(Wrapper)'
@@ -29,37 +28,37 @@ export default function PluginBrowserPage() {
     // biome-ignore lint/correctness/useExhaustiveDependencies: We only want to run this once
     useEffect(
         () =>
-            void (
-                Platform.OS === 'android' &&
-                navigation.setOptions({
-                    headerRight: () => (
-                        <ContextMenu
-                            title="More options"
-                            items={[
-                                {
-                                    label: 'Install from storage',
-                                    action: installPluginFromStorage,
-                                    IconComponent: FolderIcon,
-                                },
-                            ]}
-                        >
-                            {props => (
-                                <IconButton
-                                    {...props}
-                                    variant="tertiary"
-                                    icon={getAssetIndexByName('MoreHorizontalIcon')}
-                                />
-                            )}
-                        </ContextMenu>
-                    ),
-                })
-            ),
+            navigation.setOptions({
+                headerRight: () => (
+                    <ContextMenu
+                        title="More options"
+                        items={[
+                            {
+                                label: 'Install from storage',
+                                action: installPluginFromStorage,
+                                IconComponent: FolderIcon,
+                            },
+                        ]}
+                    >
+                        {props => (
+                            <IconButton
+                                {...props}
+                                variant="tertiary"
+                                icon={getAssetIndexByName('MoreHorizontalIcon')}
+                            />
+                        )}
+                    </ContextMenu>
+                ),
+            }),
+
         [],
     )
 
     const [query, setQuery] = useState('')
 
-    const { externalPlugins, empty, noSearchResults } = useFilteredPlugins<PluginManifest & { url: string }>(
+    type InstallablePlugin = PluginManifest & { url: string }
+
+    const { externalPlugins, empty, noSearchResults } = useFilteredPlugins<InstallablePlugin>(
         [
             {
                 name: 'Mock Plugin',
@@ -81,7 +80,7 @@ export default function PluginBrowserPage() {
             },
         ],
         query,
-        { showCorePlugins: false, showVengeancePlugins: true, sortMode: 'asc' },
+        { showInternal: false, showVengeance: true, showUnmanageable: false },
     )
 
     return (
@@ -89,17 +88,21 @@ export default function PluginBrowserPage() {
             <PluginSettingsPageContext.Provider
                 value={{
                     setQuery,
-                    showCorePlugins: false,
-                    showVengeancePlugins: true,
-                    sortMode: 'asc',
+                    showInternal: false,
+                    showVengeance: true,
+                    showUnmanageable: false,
                     ContextMenuComponent: memo(() => null),
                 }}
             >
                 <Stack spacing={16} style={styles.grow}>
                     <Show when={!empty || noSearchResults} fallback={<NoPlugins />}>
-                        <PluginListSearchInput />
+                        <PluginListSearchAndFilters />
                         <Show when={!noSearchResults} fallback={<NoResults />}>
-                            <MasonaryFlashPluginList ListItemComponent={InstallablePluginCard} data={externalPlugins} />
+                            <MasonaryFlashPluginList<InstallablePlugin, ComponentProps<typeof InstallablePluginCard>>
+                                data={externalPlugins}
+                                ListItemComponentProps={item => ({ url: item.url })}
+                                ListItemComponent={InstallablePluginCard}
+                            />
                         </Show>
                     </Show>
                 </Stack>

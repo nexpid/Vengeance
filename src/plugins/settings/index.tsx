@@ -11,6 +11,8 @@ import {
     customData,
 } from '@revenge-mod/ui/settings'
 
+import { type FC, createContext } from 'react'
+
 import AboutSettingsPage from './pages/About'
 import ContributorsSettingsPage from './pages/Contributors'
 import CustomPageRenderer from './pages/CustomPageRenderer'
@@ -21,13 +23,12 @@ import RevengeSettingsPage from './pages/Revenge'
 import Contributors from './contributors'
 
 import type { PluginContextFor } from '@revenge-mod/plugins'
-import { type FC, createContext } from 'react'
 
 export type Storage = {
     plugins: {
-        sortMode: 'asc' | 'dsc'
-        showCorePlugins: boolean
-        showVengeancePlugins: boolean
+        showInternal: boolean
+        showVengeance: boolean
+        showUnmanageable: boolean
     }
 }
 
@@ -177,13 +178,13 @@ const plugin = registerPlugin<Storage>(
         },
         initializeStorage: () => ({
             plugins: {
-                sortMode: 'asc',
-                showCorePlugins: false,
-                showVengeancePlugins: true,
+                showInternal: false,
+                showVengeance: true,
+                showUnmanageable: false,
             },
         }),
     },
-    { core: true, manageable: false },
+    { external: false, manageable: false },
 )
 
 export const PluginContext = createContext<PluginContextFor<typeof plugin, 'AfterAppRender'>>(null!)

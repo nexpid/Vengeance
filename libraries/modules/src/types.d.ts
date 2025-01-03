@@ -1,6 +1,9 @@
+/// <reference path="../../../node_modules/@react-navigation/core/lib/typescript/src/index.d.ts" />
+
+import type { NavigationNativeStackNavigationParamList } from '@revenge-mod/modules/common'
 import type { If, Nullish } from '@revenge-mod/shared/types'
 
-import type { ComponentProps, FC, ReactNode } from 'react'
+import type { ComponentProps, ComponentType, FC, ReactNode } from 'react'
 import type {
     ImageProps,
     ImageSourcePropType,
@@ -632,5 +635,13 @@ export namespace DiscordModules {
             target: string
             children?: ReactNode
         }>
+    }
+}
+
+declare global {
+    namespace ReactNavigation {
+        interface RootParamList extends NavigationNativeStackNavigationParamList {
+            [key: string]: any
+        }
     }
 }

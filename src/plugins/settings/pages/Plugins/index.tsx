@@ -26,7 +26,7 @@ import BrowsePluginsButton from './components/BrowsePluginsButton'
 import { NoPlugins, NoResults } from './components/Illustrations'
 import InstalledPluginCard from './components/InstalledPluginCard'
 import MasonaryFlashPluginList from './components/MasonaryFlashPluginList'
-import PluginListSearchInput from './components/PluginListSearchInput'
+import PluginListSearchAndFilters from './components/PluginListSearchInputAndFilters'
 import { PluginSettingsPageContext, styles } from './components/shared'
 
 import { useFilteredPlugins } from './hooks'
@@ -41,8 +41,8 @@ export default function PluginsSettingsPage() {
     useObservable([pluginsStates, storage, externalPluginsMetadata])
 
     const [query, setQuery] = useState('')
-    const { showCorePlugins, showVengeancePlugins, sortMode } = storage.plugins
-    const { externalPlugins, vengeancePlugins, corePlugins, empty, noSearchResults } = useFilteredPlugins(
+    const { showInternal, showVengeance, showUnmanageable } = storage.plugins
+    const { externalPlugins, vengeancePlugins, internalPlugins, empty, noSearchResults } = useFilteredPlugins(
         Object.values(registeredPlugins),
         query,
         storage.plugins,
@@ -51,36 +51,18 @@ export default function PluginsSettingsPage() {
     const ContextMenuComponent = memo(
         ({ children }: Pick<ComponentProps<DiscordModules.Components.ContextMenu>, 'children'>) => (
             <ContextMenu
-                title="Sort & Filter"
+                title="Filters"
                 items={[
-                    ...(empty
-                        ? []
-                        : [
-                              [
-                                  {
-                                      label: 'Sort by name (A-Z)',
-                                      IconComponent: sortMode === 'asc' ? CheckmarkLargeIcon : undefined,
-                                      action: () => (storage.plugins.sortMode = 'asc'),
-                                  },
-                                  {
-                                      label: 'Sort by name (Z-A)',
-                                      IconComponent: sortMode === 'dsc' ? CheckmarkLargeIcon : undefined,
-                                      action: () => (storage.plugins.sortMode = 'dsc'),
-                                  },
-                              ],
-                          ]),
                     [
                         {
                             label: 'Show Vengeance plugins',
-                            IconComponent: showVengeancePlugins ? CheckmarkLargeIcon : undefined,
-                            variant: 'destructive',
-                            action: () => (storage.plugins.showVengeancePlugins = !showVengeancePlugins),
+                            IconComponent: showVengeance ? CheckmarkLargeIcon : undefined,
+                            action: () => (storage.plugins.showVengeance = !showVengeance),
                         },
                         {
-                            label: 'Show core plugins',
-                            IconComponent: showCorePlugins ? CheckmarkLargeIcon : undefined,
-                            variant: 'destructive',
-                            action: () => (storage.plugins.showCorePlugins = !showCorePlugins),
+                            label: 'Show internal plugins',
+                            IconComponent: showInternal ? CheckmarkLargeIcon : undefined,
+                            action: () => (storage.plugins.showInternal = !showInternal),
                         },
                     ],
                 ]}
@@ -93,11 +75,11 @@ export default function PluginsSettingsPage() {
     return (
         <PageWrapper withTopControls>
             <PluginSettingsPageContext.Provider
-                value={{ setQuery, showCorePlugins, showVengeancePlugins, sortMode, ContextMenuComponent }}
+                value={{ setQuery, showInternal, showVengeance, showUnmanageable, ContextMenuComponent }}
             >
                 <Stack spacing={16} style={styles.grow}>
                     <Show when={!empty || noSearchResults} fallback={<NoPlugins />}>
-                        <PluginListSearchInput />
+                        <PluginListSearchAndFilters />
                         <Show when={!noSearchResults} fallback={<NoResults />}>
                             <ScrollView
                                 fadingEdgeLength={32}
@@ -107,21 +89,23 @@ export default function PluginsSettingsPage() {
                                 <MasonaryFlashPluginList
                                     data={externalPlugins}
                                     ListItemComponent={InstalledPluginCard}
+                                    ListFooterComponent={!showInternal && PluginBrowserCTA}
                                 />
-                                <Show when={showVengeancePlugins}>
+                                <Show when={showVengeance}>
                                     <MasonaryFlashPluginList
                                         data={vengeancePlugins}
                                         header={<TableRowGroupTitle title="Vengeance Plugins" />}
                                         ListItemComponent={InstalledPluginCard}
+                                        ListFooterComponent={!showInternal && PluginBrowserCTA}
                                     />
                                 </Show>
-                                <Show when={showCorePlugins}>
+                                <Show when={showInternal}>
                                     <MasonaryFlashPluginList
-                                        data={corePlugins}
+                                        data={internalPlugins}
                                         header={
                                             // TableRowGroupTitle probably has some margin, setting it to flex-end causes it to be in the center, lucky.
                                             <View style={styles.headerContainer}>
-                                                <TableRowGroupTitle title="Core Plugins" />
+                                                <TableRowGroupTitle title="Internal Plugins" />
                                                 <IconButton
                                                     icon={getAssetIndexByName('CircleQuestionIcon-primary')!}
                                                     size="sm"
@@ -131,9 +115,9 @@ export default function PluginsSettingsPage() {
                                             </View>
                                         }
                                         ListItemComponent={InstalledPluginCard}
+                                        ListFooterComponent={showInternal && PluginBrowserCTA}
                                     />
                                 </Show>
-                                <PluginBrowserCTA />
                             </ScrollView>
                         </Show>
                     </Show>
@@ -154,10 +138,10 @@ function PluginBrowserCTA() {
 
 function showCorePluginsInformationAlert() {
     return openAlert(
-        'revenge.plugins.settings.plugins.core-plugins.description',
+        'revenge.plugins.settings.plugins.internal-plugins.description',
         <AlertModal
-            title="What are core plugins?"
-            content="Core plugins are an essential part of Revenge. They provide core functionalities like allowing you to access this settings menu. Disabling core plugins may cause unexpected behavior."
+            title="What are internal plugins?"
+            content="Internal plugins are integrated into Revenge and provide core functionalities, such as this settings menu. Some internal plugins cannot be disabled, as they provide resources required by other plugins."
             actions={<AlertActionButton text="OK" />}
         />,
     )

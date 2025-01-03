@@ -113,7 +113,7 @@ const plugin = registerPlugin<{
         }),
     },
     {
-        core: true,
+        external: false,
         manageable: true,
         enabled: false,
     },

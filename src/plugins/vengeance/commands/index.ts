@@ -79,5 +79,5 @@ registerPlugin(
             })
         },
     },
-    { core: true, manageable: true, enabled: true },
+    { external: false, manageable: true, enabled: true },
 )

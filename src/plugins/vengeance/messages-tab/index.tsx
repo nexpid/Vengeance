@@ -109,5 +109,5 @@ registerPlugin(
             patcher.instead(modules.findProp<{ type: FC }>('Messages', 'DragPreview')!, 'type', () => null)
         },
     },
-    { core: true, manageable: true },
+    { external: false, manageable: true },
 )

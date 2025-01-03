@@ -250,7 +250,7 @@ const plugin = registerPlugin<{
             )
         },
     },
-    { core: true, manageable: true },
+    { external: false, manageable: true },
 )
 
 export type FreeNitroPluginContext = PluginContextFor<typeof plugin, 'BeforeAppRender'>

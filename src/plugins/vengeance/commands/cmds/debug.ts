@@ -1,8 +1,10 @@
+/// <reference path="./debug.d.ts" />
+
 import { messages } from '@revenge-mod/modules/common'
 import { findByProps } from '@revenge-mod/modules/finders'
 import { ClientInfoModule } from '@revenge-mod/modules/native'
 import { lazyValue } from '@revenge-mod/utils/lazy'
-import { ApplicationCommandInputType, ApplicationCommandOptionType } from 'libraries/modules/src/commands'
+import { ApplicationCommandInputType, ApplicationCommandOptionType } from 'libraries/modules/src/common/commands'
 import { Platform } from 'react-native'
 import type { SimpleCommand } from '..'
 

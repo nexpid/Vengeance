@@ -81,13 +81,19 @@ export default function PluginBrowserPage() {
             },
         ],
         query,
-        { showCorePlugins: false, sortMode: 'asc' },
+        { showCorePlugins: false, showVengeancePlugins: true, sortMode: 'asc' },
     )
 
     return (
         <PageWrapper withTopControls>
             <PluginSettingsPageContext.Provider
-                value={{ setQuery, showCorePlugins: false, sortMode: 'asc', ContextMenuComponent: memo(() => null) }}
+                value={{
+                    setQuery,
+                    showCorePlugins: false,
+                    showVengeancePlugins: true,
+                    sortMode: 'asc',
+                    ContextMenuComponent: memo(() => null),
+                }}
             >
                 <Stack spacing={16} style={styles.grow}>
                     <Show when={!empty || noSearchResults} fallback={<NoPlugins />}>

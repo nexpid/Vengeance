@@ -1,7 +1,7 @@
 import { getAssetIndexByName } from '@revenge-mod/assets'
 import { Card, TableRowGroup, TableRowIcon, TableSwitchRow, Text } from '@revenge-mod/modules/common/components'
 import { registerPlugin } from '@revenge-mod/plugins/internals'
-import { useObservable } from '@revenge-mod/storage'
+import { useObserveStorage } from '@revenge-mod/storage'
 import { ScrollView } from 'react-native'
 import PageWrapper from 'src/plugins/settings/pages/(Wrapper)'
 
@@ -44,7 +44,7 @@ registerPlugin<{
             }
         },
         SettingsComponent({ storage }) {
-            useObservable([storage])
+            useObserveStorage([storage])
 
             return (
                 <ScrollView>

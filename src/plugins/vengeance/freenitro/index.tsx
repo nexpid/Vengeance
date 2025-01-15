@@ -10,7 +10,7 @@ import {
 } from '@revenge-mod/modules/common/components'
 import type { PluginContextFor } from '@revenge-mod/plugins'
 import { registerPlugin } from '@revenge-mod/plugins/internals'
-import { useObservable } from '@revenge-mod/storage'
+import { useObserveStorage } from '@revenge-mod/storage'
 import { SemanticColor } from '@revenge-mod/ui/colors'
 import { ScrollView, View } from 'react-native'
 import PageWrapper from 'src/plugins/settings/pages/(Wrapper)'
@@ -133,7 +133,7 @@ const plugin = registerPlugin<{
             }
         },
         SettingsComponent({ storage }) {
-            useObservable([storage])
+            useObserveStorage([storage])
             const settingsStyles = useSettingsStyles()
 
             return (

@@ -72,7 +72,8 @@ export const { TextStyleSheet, createStyles, dismissAlerts, openAlert } = lazyDe
         }>('createStyles', 'TextStyleSheet')!,
 )
 
-export const showSimpleActionSheet = findSingleProp<typeof DiscordModules.ActionSheets.showSimpleActionSheet>('showSimpleActionSheet')!
+export const showSimpleActionSheet =
+    findSingleProp<typeof DiscordModules.ActionSheets.showSimpleActionSheet>('showSimpleActionSheet')!
 
 /// FLUX
 

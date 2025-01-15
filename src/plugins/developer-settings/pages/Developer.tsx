@@ -41,7 +41,6 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { ScrollView } from 'react-native'
 import { invalidateCache } from '@revenge-mod/modules/metro/caches'
 
-
 export default function DeveloperSettingsPage() {
     const context = useContext(PluginContext)
     const {

@@ -4,7 +4,9 @@ import type { StackScreenProps } from '@react-navigation/stack'
 export default function CustomPageRenderer() {
     const navigation = NavigationNative.useNavigation()
     const route =
-        NavigationNative.useRoute<StackScreenProps<NavigationNativeStackNavigationParamList, 'RevengeCustomPage'>['route']>()
+        NavigationNative.useRoute<
+            StackScreenProps<NavigationNativeStackNavigationParamList, 'RevengeCustomPage'>['route']
+        >()
 
     const { render: PageComponent, ...args } = route.params
 

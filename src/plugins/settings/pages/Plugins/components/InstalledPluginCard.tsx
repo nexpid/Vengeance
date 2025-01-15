@@ -9,7 +9,6 @@ import { BundleUpdaterManager } from '@revenge-mod/modules/native'
 
 import { registeredPlugins } from '@revenge-mod/plugins/internals'
 
-
 import { useContext } from 'react'
 
 import PluginCard, { type PluginCardProps } from './PluginCard'

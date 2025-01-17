@@ -27,4 +27,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload bundle --clobber dist/*
+          gh release upload bundle --clobber dist/revenge.bundle dist/js/*.js

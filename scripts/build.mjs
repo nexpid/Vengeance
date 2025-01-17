@@ -9,7 +9,7 @@ import shimmedDeps from '../shims/deps'
 import { spawnSync } from 'child_process'
 
 const args = yargs(process.argv.slice(2))
-const { release, dev } = args
+const { minify, release, dev } = args
 
 const context = {
     hash: 'local',
@@ -103,6 +103,7 @@ const config = {
     ],
 }
 
+/** @param {typeof config} overrideConfig */
 export async function buildBundle(overrideConfig = {}) {
     context.hash = await Bun.$`git rev-parse --short HEAD`
         .nothrow()
@@ -127,6 +128,12 @@ const isThisFileBeingRunViaCLI = pathToThisFile.includes(pathPassedToNode)
 if (isThisFileBeingRunViaCLI) {
     const initialStartTime = performance.now()
 
+    if (minify)
+        await buildBundle({
+            outfile: 'dist/js/revenge.min.js',
+            minifySyntax: true,
+            minifyWhitespace: true,
+        })
     await buildBundle()
 
     compileToBytecode(config.outfile)

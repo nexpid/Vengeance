@@ -48,7 +48,12 @@ export function serve() {
 
     console.info(chalk.bold.greenBright('\nServing VENGEANCE bundle, available on:\n'))
 
-    const netInterfaces = os.networkInterfaces()
+    // WEIRD HACK: running this on bun in termux crashes for some weird fucking reason? this simple workaround fixes it lol
+    let netInterfaces = {}
+    try {
+        netInterfaces = os.networkInterfaces()
+    } catch {}
+
     for (const netinterfaces of Object.values(netInterfaces)) {
         for (const details of netinterfaces || []) {
             if (details.family !== 'IPv4') continue

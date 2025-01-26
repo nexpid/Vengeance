@@ -52,7 +52,9 @@ const plugin = registerPlugin<Storage>(
                 },
             } = context
 
-            for (const member of Object.values(Contributors).flat().filter((x, i, a) => !a.slice(0, i).findIndex(y => y.name === x.name))) {
+            for (const member of Object.values(Contributors)
+                .flat()
+                .filter((x, i, a) => !a.slice(0, i).find(y => y.name === x.name))) {
                 if (!member.icon) continue
 
                 assets.registerCustom(

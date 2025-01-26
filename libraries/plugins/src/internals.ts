@@ -130,7 +130,8 @@ export function registerPlugin<
         errors: [],
         async start() {
             const handleError = (e: unknown) => {
-                this.errors.push(e)
+                logger.log(`A plugin errored, ee-yikes!!! Pluh: "${this.id}", error: ${e}`)
+		this.errors.push(e)
                 // Disabling stops the plugin
                 this.disable()
             }
